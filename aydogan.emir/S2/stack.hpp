@@ -23,6 +23,23 @@ void push(T&& rhs)
 {
     data_.push_front(std::move(rhs));
 }
+T& top()
+{
+  if (empty())
+  {
+    throw std::out_of_range("Stack is empty");
+  }
+  return data_.front();
+}
+
+const T& top() const
+{
+  if (empty())
+  {
+    throw std::out_of_range("Stack is empty");
+  }
+  return data_.front();
+}
   private:
     List< T > data_;
   };
