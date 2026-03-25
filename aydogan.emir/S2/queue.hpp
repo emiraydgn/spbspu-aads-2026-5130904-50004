@@ -61,6 +61,24 @@ const T& front() const
   }
   return data_.front();
 }
+T drop()
+{
+  if (empty())
+  {
+    throw std::out_of_range("Queue is empty");
+  }
+
+  bool wasLast = (data_.begin() == tail_);
+  T value = std::move(data_.front());
+  data_.pop_front();
+
+  if (wasLast)
+  {
+    tail_ = data_.beforeBegin();
+  }
+
+  return value;
+}
   private:
     List< T > data_;
     Iterator< T > tail_;
