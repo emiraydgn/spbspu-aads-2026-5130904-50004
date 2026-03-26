@@ -338,11 +338,56 @@ namespace aydogan
   return evaluatePostfix(postfix);
 }
 
-  int run(std::istream& in, std::ostream& out, std::ostream& err)
+int aydogan::run(std::istream& in, std::ostream& out, std::ostream& err)
+{
+  Stack< long long > results;
+  std::string line;
+
+  while (std::getline(in, line))
   {
-    (void)in;
-    (void)out;
-    (void)err;
-    return 0;
+    bool onlySpaces = true;
+    for (char c: line)
+    {
+      if (!std::isspace(static_cast< unsigned char >(c)))
+      {
+        onlySpaces = false;
+        break;
+      }
+    }
+
+    if (onlySpaces)
+    {
+      continue;
+    }
+
+    try
+    {
+      results.push(calculateExpression(line));
+    }
+    catch (const std::exception& e)
+    {
+      err << e.what() << "\n";
+      return 1;
+    }
   }
+
+  bool first = true;
+  while (!results.empty())
+  {
+    if (!first)
+    {
+      out << " ";
+    }
+    out << results.drop();
+    first = false;
+  }
+
+  if (!first)
+  {
+    out << "\n";
+  }
+
+  return 0;
+}
+
 }
