@@ -281,6 +281,55 @@ aydogan::Queue< std::string > toPostfix(const std::string& expression)
   return output;
 }
 
+long long evaluatePostfix(aydogan::Queue< std::string > postfix)
+{
+  aydogan::Stack< long long > values;
+
+  while (!postfix.empty())
+  {
+    std::string token = postfix.drop();
+
+    if (isNumber(token))
+    {
+      values.push(parseNumber(token));
+    }
+    else if (isOperator(token))
+    {
+      if (values.empty())
+      {
+        throw std::runtime_error("Invalid expression");
+      }
+      long long rhs = values.drop();
+
+      if (values.empty())
+      {
+        throw std::runtime_error("Invalid expression");
+      }
+      long long lhs = values.drop();
+
+      values.push(applyOperator(lhs, rhs, token));
+    }
+    else
+    {
+      throw std::runtime_error("Invalid expression");
+    }
+  }
+
+  if (values.empty())
+  {
+    throw std::runtime_error("Invalid expression");
+  }
+
+  long long result = values.drop();
+
+  if (!values.empty())
+  {
+    throw std::runtime_error("Invalid expression");
+  }
+
+  return result;
+}
+
 namespace aydogan
 {
   long long calculateExpression(const std::string& expression)
