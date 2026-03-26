@@ -175,6 +175,36 @@ long long checkedPow(long long lhs, long long rhs)
   return result;
 }
 
+long long applyOperator(long long lhs, long long rhs, const std::string& op)
+{
+  if (op == "+")
+  {
+    return checkedAdd(lhs, rhs);
+  }
+  if (op == "-")
+  {
+    return checkedSub(lhs, rhs);
+  }
+  if (op == "*")
+  {
+    return checkedMul(lhs, rhs);
+  }
+  if (op == "/")
+  {
+    return checkedDiv(lhs, rhs);
+  }
+  if (op == "%")
+  {
+    return checkedMod(lhs, rhs);
+  }
+  if (op == "**")
+  {
+    return checkedPow(lhs, rhs);
+  }
+
+  throw std::runtime_error("Invalid expression");
+}
+
 namespace aydogan
 {
   long long calculateExpression(const std::string& expression)
