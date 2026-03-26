@@ -87,6 +87,65 @@ long long parseNumber(const std::string& token)
   return value;
 }
 
+long long checkedAdd(long long lhs, long long rhs)
+{
+  __int128 value = static_cast< __int128 >(lhs) + static_cast< __int128 >(rhs);
+  if (value < std::numeric_limits< long long >::min() ||
+      value > std::numeric_limits< long long >::max())
+  {
+    throw std::overflow_error("Overflow");
+  }
+  return static_cast< long long >(value);
+}
+
+long long checkedSub(long long lhs, long long rhs)
+{
+  __int128 value = static_cast< __int128 >(lhs) - static_cast< __int128 >(rhs);
+  if (value < std::numeric_limits< long long >::min() ||
+      value > std::numeric_limits< long long >::max())
+  {
+    throw std::overflow_error("Overflow");
+  }
+  return static_cast< long long >(value);
+}
+
+long long checkedMul(long long lhs, long long rhs)
+{
+  __int128 value = static_cast< __int128 >(lhs) * static_cast< __int128 >(rhs);
+  if (value < std::numeric_limits< long long >::min() ||
+      value > std::numeric_limits< long long >::max())
+  {
+    throw std::overflow_error("Overflow");
+  }
+  return static_cast< long long >(value);
+}
+
+long long checkedDiv(long long lhs, long long rhs)
+{
+  if (rhs == 0)
+  {
+    throw std::runtime_error("Division by zero");
+  }
+  if (lhs == std::numeric_limits< long long >::min() && rhs == -1)
+  {
+    throw std::overflow_error("Overflow");
+  }
+  return lhs / rhs;
+}
+
+long long checkedMod(long long lhs, long long rhs)
+{
+  if (rhs == 0)
+  {
+    throw std::runtime_error("Division by zero");
+  }
+  if (lhs == std::numeric_limits< long long >::min() && rhs == -1)
+  {
+    throw std::overflow_error("Overflow");
+  }
+  return lhs % rhs;
+}
+
 namespace aydogan
 {
   long long calculateExpression(const std::string& expression)
