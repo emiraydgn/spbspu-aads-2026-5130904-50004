@@ -36,3 +36,26 @@ BOOST_AUTO_TEST_CASE(queue_test)
   BOOST_CHECK_EQUAL(q.drop(), 30);
   BOOST_CHECK(q.empty());
 }
+
+BOOST_AUTO_TEST_CASE(simple_expression_test)
+{
+  BOOST_CHECK_EQUAL(aydogan::calculateExpression("1 + 3"), 4);
+  BOOST_CHECK_EQUAL(aydogan::calculateExpression("4 * 7 - 3"), 25);
+}
+
+BOOST_AUTO_TEST_CASE(parentheses_test)
+{
+  BOOST_CHECK_EQUAL(aydogan::calculateExpression("( 1 + 2 ) * ( 3 - 4 )"), -3);
+  BOOST_CHECK_EQUAL(aydogan::calculateExpression("( 10 / ( 2 + 3 ) % 4 )"), 2);
+}
+
+BOOST_AUTO_TEST_CASE(power_test)
+{
+  BOOST_CHECK_EQUAL(aydogan::calculateExpression("2 ** 3"), 8);
+  BOOST_CHECK_EQUAL(aydogan::calculateExpression("( 2 + 1 ) ** 3"), 27);
+}
+
+BOOST_AUTO_TEST_CASE(power_associativity_test)
+{
+  BOOST_CHECK_EQUAL(aydogan::calculateExpression("2 ** 3 ** 2"), 512);
+}
