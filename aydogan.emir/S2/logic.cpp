@@ -65,6 +65,27 @@ namespace
     return true;
   }
 }
+long long parseNumber(const std::string& token)
+{
+  std::size_t pos = 0;
+  long long value = 0;
+
+  try
+  {
+    value = std::stoll(token, &pos);
+  }
+  catch (const std::exception&)
+  {
+    throw std::runtime_error("Invalid expression");
+  }
+
+  if (pos != token.size())
+  {
+    throw std::runtime_error("Invalid expression");
+  }
+
+  return value;
+}
 
 namespace aydogan
 {
