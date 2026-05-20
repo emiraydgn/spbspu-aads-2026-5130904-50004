@@ -42,6 +42,23 @@ namespace aydogan
       weight(value)
     {}
   };
+
+  class Graph
+  {
+  public:
+    Graph();
+
+    void swap(Graph& other) noexcept;
+
+    bool hasVertex(const std::string& vertex) const;
+
+  private:
+    using WeightList = std::vector< unsigned int >;
+    using EdgeTable = HashTable< EdgeKey, WeightList, EdgeKeyHash, EdgeKeyEqual >;
+
+    std::vector< std::string > vertices_;
+    EdgeTable edges_;
+  };
 }
 
 #endif
