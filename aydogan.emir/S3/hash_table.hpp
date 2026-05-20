@@ -66,6 +66,64 @@ namespace aydogan
   ++size_;
 }
 
+bool contains(const Key& key) const
+{
+  return find(key) != nullptr;
+}
+
+bool has(const Key& key) const
+{
+  return contains(key);
+}
+
+Value* find(const Key& key)
+{
+  std::size_t index = getIndex(key);
+
+  for (Entry& entry: buckets_[index])
+  {
+    if (equal_(entry.key, key))
+    {
+      return &entry.value;
+    }
+  }
+
+  return nullptr;
+}
+
+const Value* find(const Key& key) const
+{
+  std::size_t index = getIndex(key);
+
+  for (const Entry& entry: buckets_[index])
+  {
+    if (equal_(entry.key, key))
+    {
+      return &entry.value;
+    }
+  }
+
+  return nullptr;
+}
+
+Value drop(const Key& key)
+{
+  std::size_t index = getIndex(key);
+
+  for (auto it = buckets_[index].begin(); it != buckets_[index].end(); ++it)
+  {
+    if (equal_(it->key, key))
+    {
+      Value value = it->value;
+      buckets_[index].erase(it);
+      --size_;
+      return value;
+    }
+  }
+
+  throw std::out_of_range("Key not found");
+}
+
 Value* find(const Key& key)
 {
   std::size_t index = getIndex(key);
