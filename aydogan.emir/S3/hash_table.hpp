@@ -49,6 +49,58 @@ namespace aydogan
       {}
     };
 
+    void insert(const Key& key, const Value& value)
+{
+  std::size_t index = getIndex(key);
+
+  for (Entry& entry: buckets_[index])
+  {
+    if (equal_(entry.key, key))
+    {
+      entry.value = value;
+      return;
+    }
+  }
+
+  buckets_[index].push_back(Entry(key, value));
+  ++size_;
+}
+
+Value* find(const Key& key)
+{
+  std::size_t index = getIndex(key);
+
+  for (Entry& entry: buckets_[index])
+  {
+    if (equal_(entry.key, key))
+    {
+      return &entry.value;
+    }
+  }
+
+  return nullptr;
+}
+
+const Value* find(const Key& key) const
+{
+  std::size_t index = getIndex(key);
+
+  for (const Entry& entry: buckets_[index])
+  {
+    if (equal_(entry.key, key))
+    {
+      return &entry.value;
+    }
+  }
+
+  return nullptr;
+}
+
+bool contains(const Key& key) const
+{
+  return find(key) != nullptr;
+}
+
     explicit HashTable(std::size_t bucketCount = 16):
       buckets_(bucketCount == 0 ? 1 : bucketCount),
       size_(0),
