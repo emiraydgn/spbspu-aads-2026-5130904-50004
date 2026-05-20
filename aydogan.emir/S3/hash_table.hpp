@@ -113,6 +113,26 @@ bool erase(const Key& key)
   return false;
 }
 
+void rehash(std::size_t bucketCount)
+{
+  HashTable temp(bucketCount == 0 ? 1 : bucketCount);
+
+  for (ConstIterator it = cbegin(); it != cend(); ++it)
+  {
+    temp.insert(it->key, it->value);
+  }
+
+  swap(temp);
+}
+
+void swap(HashTable& other) noexcept
+{
+  buckets_.swap(other.buckets_);
+  std::swap(size_, other.size_);
+  std::swap(hash_, other.hash_);
+  std::swap(equal_, other.equal_);
+}
+
 Value drop(const Key& key)
 {
   std::size_t index = getIndex(key);
