@@ -96,6 +96,53 @@ const Value* find(const Key& key) const
   return nullptr;
 }
 
+bool erase(const Key& key)
+{
+  std::size_t index = getIndex(key);
+
+  for (auto it = buckets_[index].begin(); it != buckets_[index].end(); ++it)
+  {
+    if (equal_(it->key, key))
+    {
+      buckets_[index].erase(it);
+      --size_;
+      return true;
+    }
+  }
+
+  return false;
+}
+
+Value drop(const Key& key)
+{
+  std::size_t index = getIndex(key);
+
+  for (auto it = buckets_[index].begin(); it != buckets_[index].end(); ++it)
+  {
+    if (equal_(it->key, key))
+    {
+      Value value = it->value;
+      buckets_[index].erase(it);
+      --size_;
+      return value;
+    }
+  }
+
+  throw std::out_of_range("Key not found");
+}
+
+void rehash(std::size_t bucketCount)
+{
+  HashTable temp(bucketCount == 0 ? 1 : bucketCount);
+
+  for (ConstIterator it = cbegin(); it != cend(); ++it)
+  {
+    temp.insert(it->key, it->value);
+  }
+
+  swap(temp);
+}
+
 bool contains(const Key& key) const
 {
   return find(key) != nullptr;
