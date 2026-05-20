@@ -60,9 +60,18 @@ namespace aydogan
     std::vector< EdgeInfo > getOutbound(const std::string& vertex) const;
     std::vector< EdgeInfo > getInbound(const std::string& vertex) const;
 
+    Graph mergeWith(const Graph& other) const;
+    Graph extractSubgraph(const std::vector< std::string >& selected) const;
+
   private:
     using WeightList = std::vector< unsigned int >;
     using EdgeTable = HashTable< EdgeKey, WeightList, EdgeKeyHash, EdgeKeyEqual >;
+
+    void addVertexDirect(const std::string& vertex);
+    void addEdgeDirect(const std::string& from, const std::string& to, unsigned int weight);
+
+    void sortVertices();
+    static void sortEdges(std::vector< EdgeInfo >& edges);
 
     std::vector< std::string > vertices_;
     EdgeTable edges_;
