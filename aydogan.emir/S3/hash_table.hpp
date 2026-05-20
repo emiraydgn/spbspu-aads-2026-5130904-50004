@@ -4,6 +4,7 @@
 #include <boost/hash2/siphash.hpp>
 #include <cstddef>
 #include <list>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -49,232 +50,179 @@ namespace aydogan
       {}
     };
 
-    void insert(const Key& key, const Value& value)
-{
-  std::size_t index = getIndex(key);
-
-  for (Entry& entry: buckets_[index])
-  {
-    if (equal_(entry.key, key))
+    class Iterator
     {
-      entry.value = value;
-      return;
-    }
-  }
+    public:
+      Iterator():
+        table_(nullptr),
+        bucket_(0)
+      {}
 
-  buckets_[index].push_back(Entry(key, value));
-  ++size_;
-}
+      Entry& operator*() const
+      {
+        return *entry_;
+      }
 
-bool contains(const Key& key) const
-{
-  return find(key) != nullptr;
-}
+      Entry* operator->() const
+      {
+        return &(*entry_);
+      }
 
-bool has(const Key& key) const
-{
-  return contains(key);
-}
+      Iterator& operator++()
+      {
+        if (table_ == nullptr || bucket_ >= table_->buckets_.size())
+        {
+          return *this;
+        }
 
-Value* find(const Key& key)
-{
-  std::size_t index = getIndex(key);
+        ++entry_;
+        moveToValid();
+        return *this;
+      }
 
-  for (Entry& entry: buckets_[index])
-  {
-    if (equal_(entry.key, key))
+      bool operator==(const Iterator& other) const
+      {
+        if (table_ != other.table_ || bucket_ != other.bucket_)
+        {
+          return false;
+        }
+
+        if (table_ == nullptr || bucket_ >= table_->buckets_.size())
+        {
+          return true;
+        }
+
+        return entry_ == other.entry_;
+      }
+
+      bool operator!=(const Iterator& other) const
+      {
+        return !(*this == other);
+      }
+
+    private:
+      friend class HashTable;
+
+      Iterator(HashTable* table, std::size_t bucket):
+        table_(table),
+        bucket_(bucket)
+      {
+        if (table_ != nullptr && bucket_ < table_->buckets_.size())
+        {
+          entry_ = table_->buckets_[bucket_].begin();
+          moveToValid();
+        }
+      }
+
+      void moveToValid()
+      {
+        while (bucket_ < table_->buckets_.size())
+        {
+          if (entry_ != table_->buckets_[bucket_].end())
+          {
+            return;
+          }
+
+          ++bucket_;
+
+          if (bucket_ < table_->buckets_.size())
+          {
+            entry_ = table_->buckets_[bucket_].begin();
+          }
+        }
+      }
+
+      HashTable* table_;
+      std::size_t bucket_;
+      typename std::list< Entry >::iterator entry_;
+    };
+
+    class ConstIterator
     {
-      return &entry.value;
-    }
-  }
+    public:
+      ConstIterator():
+        table_(nullptr),
+        bucket_(0)
+      {}
 
-  return nullptr;
-}
+      const Entry& operator*() const
+      {
+        return *entry_;
+      }
 
-const Value* find(const Key& key) const
-{
-  std::size_t index = getIndex(key);
+      const Entry* operator->() const
+      {
+        return &(*entry_);
+      }
 
-  for (const Entry& entry: buckets_[index])
-  {
-    if (equal_(entry.key, key))
-    {
-      return &entry.value;
-    }
-  }
+      ConstIterator& operator++()
+      {
+        if (table_ == nullptr || bucket_ >= table_->buckets_.size())
+        {
+          return *this;
+        }
 
-  return nullptr;
-}
+        ++entry_;
+        moveToValid();
+        return *this;
+      }
 
-Value drop(const Key& key)
-{
-  std::size_t index = getIndex(key);
+      bool operator==(const ConstIterator& other) const
+      {
+        if (table_ != other.table_ || bucket_ != other.bucket_)
+        {
+          return false;
+        }
 
-  for (auto it = buckets_[index].begin(); it != buckets_[index].end(); ++it)
-  {
-    if (equal_(it->key, key))
-    {
-      Value value = it->value;
-      buckets_[index].erase(it);
-      --size_;
-      return value;
-    }
-  }
+        if (table_ == nullptr || bucket_ >= table_->buckets_.size())
+        {
+          return true;
+        }
 
-  throw std::out_of_range("Key not found");
-}
+        return entry_ == other.entry_;
+      }
 
-Value* find(const Key& key)
-{
-  std::size_t index = getIndex(key);
+      bool operator!=(const ConstIterator& other) const
+      {
+        return !(*this == other);
+      }
 
-  for (Entry& entry: buckets_[index])
-  {
-    if (equal_(entry.key, key))
-    {
-      return &entry.value;
-    }
-  }
+    private:
+      friend class HashTable;
 
-  return nullptr;
-}
+      ConstIterator(const HashTable* table, std::size_t bucket):
+        table_(table),
+        bucket_(bucket)
+      {
+        if (table_ != nullptr && bucket_ < table_->buckets_.size())
+        {
+          entry_ = table_->buckets_[bucket_].cbegin();
+          moveToValid();
+        }
+      }
 
-const Value* find(const Key& key) const
-{
-  std::size_t index = getIndex(key);
+      void moveToValid()
+      {
+        while (bucket_ < table_->buckets_.size())
+        {
+          if (entry_ != table_->buckets_[bucket_].cend())
+          {
+            return;
+          }
 
-  for (const Entry& entry: buckets_[index])
-  {
-    if (equal_(entry.key, key))
-    {
-      return &entry.value;
-    }
-  }
+          ++bucket_;
 
-  return nullptr;
-}
+          if (bucket_ < table_->buckets_.size())
+          {
+            entry_ = table_->buckets_[bucket_].cbegin();
+          }
+        }
+      }
 
-bool erase(const Key& key)
-{
-  std::size_t index = getIndex(key);
-
-  for (auto it = buckets_[index].begin(); it != buckets_[index].end(); ++it)
-  {
-    if (equal_(it->key, key))
-    {
-      buckets_[index].erase(it);
-      --size_;
-      return true;
-    }
-  }
-
-  return false;
-}
-
-void rehash(std::size_t bucketCount)
-{
-  HashTable temp(bucketCount == 0 ? 1 : bucketCount);
-
-  for (ConstIterator it = cbegin(); it != cend(); ++it)
-  {
-    temp.insert(it->key, it->value);
-  }
-
-  swap(temp);
-}
-
-void swap(HashTable& other) noexcept
-{
-  buckets_.swap(other.buckets_);
-  std::swap(size_, other.size_);
-  std::swap(hash_, other.hash_);
-  std::swap(equal_, other.equal_);
-}
-
-Value drop(const Key& key)
-{
-  std::size_t index = getIndex(key);
-
-  for (auto it = buckets_[index].begin(); it != buckets_[index].end(); ++it)
-  {
-    if (equal_(it->key, key))
-    {
-      Value value = it->value;
-      buckets_[index].erase(it);
-      --size_;
-      return value;
-    }
-  }
-
-  throw std::out_of_range("Key not found");
-}
-
-void rehash(std::size_t bucketCount)
-{
-  HashTable temp(bucketCount == 0 ? 1 : bucketCount);
-
-  for (ConstIterator it = cbegin(); it != cend(); ++it)
-  {
-    temp.insert(it->key, it->value);
-  }
-
-  swap(temp);
-}
-
-std::size_t size() const noexcept
-{
-  return size_;
-}
-
-std::size_t getSize() const noexcept
-{
-  return size_;
-}
-
-std::size_t bucketCount() const noexcept
-{
-  return buckets_.size();
-}
-
-bool empty() const noexcept
-{
-  return size_ == 0;
-}
-
-Iterator begin()
-{
-  return Iterator(this, 0);
-}
-
-Iterator end()
-{
-  return Iterator(this, buckets_.size());
-}
-
-ConstIterator begin() const
-{
-  return cbegin();
-}
-
-ConstIterator end() const
-{
-  return cend();
-}
-
-ConstIterator cbegin() const
-{
-  return ConstIterator(this, 0);
-}
-
-ConstIterator cend() const
-{
-  return ConstIterator(this, buckets_.size());
-}
-
-bool contains(const Key& key) const
-{
-  return find(key) != nullptr;
-}
+      const HashTable* table_;
+      std::size_t bucket_;
+      typename std::list< Entry >::const_iterator entry_;
+    };
 
     explicit HashTable(std::size_t bucketCount = 16):
       buckets_(bucketCount == 0 ? 1 : bucketCount),
@@ -282,6 +230,180 @@ bool contains(const Key& key) const
       hash_(),
       equal_()
     {}
+
+    HashTable(const HashTable& other) = default;
+    HashTable(HashTable&& other) noexcept = default;
+    ~HashTable() = default;
+
+    HashTable& operator=(const HashTable& other) = default;
+    HashTable& operator=(HashTable&& other) noexcept = default;
+
+    void swap(HashTable& other) noexcept
+    {
+      buckets_.swap(other.buckets_);
+      std::swap(size_, other.size_);
+      std::swap(hash_, other.hash_);
+      std::swap(equal_, other.equal_);
+    }
+
+    void insert(const Key& key, const Value& value)
+    {
+      std::size_t index = getIndex(key);
+
+      for (Entry& entry: buckets_[index])
+      {
+        if (equal_(entry.key, key))
+        {
+          entry.value = value;
+          return;
+        }
+      }
+
+      buckets_[index].push_back(Entry(key, value));
+      ++size_;
+    }
+
+    void add(const Key& key, const Value& value)
+    {
+      insert(key, value);
+    }
+
+    bool contains(const Key& key) const
+    {
+      return find(key) != nullptr;
+    }
+
+    bool has(const Key& key) const
+    {
+      return contains(key);
+    }
+
+    Value* find(const Key& key)
+    {
+      std::size_t index = getIndex(key);
+
+      for (Entry& entry: buckets_[index])
+      {
+        if (equal_(entry.key, key))
+        {
+          return &entry.value;
+        }
+      }
+
+      return nullptr;
+    }
+
+    const Value* find(const Key& key) const
+    {
+      std::size_t index = getIndex(key);
+
+      for (const Entry& entry: buckets_[index])
+      {
+        if (equal_(entry.key, key))
+        {
+          return &entry.value;
+        }
+      }
+
+      return nullptr;
+    }
+
+    bool erase(const Key& key)
+    {
+      std::size_t index = getIndex(key);
+
+      for (auto it = buckets_[index].begin(); it != buckets_[index].end(); ++it)
+      {
+        if (equal_(it->key, key))
+        {
+          buckets_[index].erase(it);
+          --size_;
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    Value drop(const Key& key)
+    {
+      std::size_t index = getIndex(key);
+
+      for (auto it = buckets_[index].begin(); it != buckets_[index].end(); ++it)
+      {
+        if (equal_(it->key, key))
+        {
+          Value value = it->value;
+          buckets_[index].erase(it);
+          --size_;
+          return value;
+        }
+      }
+
+      throw std::out_of_range("Key not found");
+    }
+
+    void rehash(std::size_t bucketCount)
+    {
+      HashTable temp(bucketCount == 0 ? 1 : bucketCount);
+
+      for (ConstIterator it = cbegin(); it != cend(); ++it)
+      {
+        temp.insert(it->key, it->value);
+      }
+
+      swap(temp);
+    }
+
+    std::size_t size() const noexcept
+    {
+      return size_;
+    }
+
+    std::size_t getSize() const noexcept
+    {
+      return size_;
+    }
+
+    std::size_t bucketCount() const noexcept
+    {
+      return buckets_.size();
+    }
+
+    bool empty() const noexcept
+    {
+      return size_ == 0;
+    }
+
+    Iterator begin()
+    {
+      return Iterator(this, 0);
+    }
+
+    Iterator end()
+    {
+      return Iterator(this, buckets_.size());
+    }
+
+    ConstIterator begin() const
+    {
+      return cbegin();
+    }
+
+    ConstIterator end() const
+    {
+      return cend();
+    }
+
+    ConstIterator cbegin() const
+    {
+      return ConstIterator(this, 0);
+    }
+
+    ConstIterator cend() const
+    {
+      return ConstIterator(this, buckets_.size());
+    }
 
   private:
     std::size_t getIndex(const Key& key) const
