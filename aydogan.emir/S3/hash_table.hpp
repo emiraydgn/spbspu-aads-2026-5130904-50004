@@ -143,6 +143,56 @@ void rehash(std::size_t bucketCount)
   swap(temp);
 }
 
+std::size_t size() const noexcept
+{
+  return size_;
+}
+
+std::size_t getSize() const noexcept
+{
+  return size_;
+}
+
+std::size_t bucketCount() const noexcept
+{
+  return buckets_.size();
+}
+
+bool empty() const noexcept
+{
+  return size_ == 0;
+}
+
+Iterator begin()
+{
+  return Iterator(this, 0);
+}
+
+Iterator end()
+{
+  return Iterator(this, buckets_.size());
+}
+
+ConstIterator begin() const
+{
+  return cbegin();
+}
+
+ConstIterator end() const
+{
+  return cend();
+}
+
+ConstIterator cbegin() const
+{
+  return ConstIterator(this, 0);
+}
+
+ConstIterator cend() const
+{
+  return ConstIterator(this, buckets_.size());
+}
+
 bool contains(const Key& key) const
 {
   return find(key) != nullptr;
