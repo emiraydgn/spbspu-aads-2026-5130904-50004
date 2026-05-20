@@ -52,6 +52,14 @@ namespace aydogan
 
     bool hasVertex(const std::string& vertex) const;
 
+    void addVertex(const std::string& vertex);
+    void addEdge(const std::string& from, const std::string& to, unsigned int weight);
+    bool removeEdge(const std::string& from, const std::string& to, unsigned int weight);
+
+    std::vector< std::string > getVertices() const;
+    std::vector< EdgeInfo > getOutbound(const std::string& vertex) const;
+    std::vector< EdgeInfo > getInbound(const std::string& vertex) const;
+
   private:
     using WeightList = std::vector< unsigned int >;
     using EdgeTable = HashTable< EdgeKey, WeightList, EdgeKeyHash, EdgeKeyEqual >;
