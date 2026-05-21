@@ -426,3 +426,78 @@ void aydogan::CommandProcessor::handleCreate(
 
   processor.graphStorage_.insert(tokens[1], graph);
 }
+
+void aydogan::CommandProcessor::handleMerge(
+  CommandProcessor& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  if (tokens.size() != 4 || processor.graphStorage_.contains(tokens[1]))
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Graph* first = processor.graphStorage_.find(tokens[2]);
+  Graph* second = processor.graphStorage_.find(tokens[3]);
+
+  if (first == nullptr || second == nullptr)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  processor.graphStorage_.insert(tokens[1], first->mergeWith(*second));
+}
+
+void aydogan::CommandProcessor::handleExtract(
+  CommandProcessor& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  unsigned int vertexCount = 0;
+
+  if (tokens.size() < 4 || !parseUnsigned(tokens[3], vertexCount))
+  {
+    printInvalid(output);
+    return;
+  }
+
+  if (
+    tokens.size() != static_cast< std::size_t >(vertexCount) + 4 ||
+    processor.graphStorage_.contains(tokens[1])
+  )
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Graph* source = processor.graphStorage_.find(tokens[2]);
+
+  if (source == nullptr)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  std::vector< std::string > selected(tokens.begin() + 4, tokens.end());
+
+  if (hasDuplicates(selected))
+  {
+    printInvalid(output);
+    return;
+  }
+
+  for (const std::string& vertex: selected)
+  {
+    if (!source->hasVertex(vertex))
+    {
+      printInvalid(output);
+      return;
+    }
+  }
+
+  processor.graphStorage_.insert(tokens[1], source->extractSubgraph(selected));
+}
