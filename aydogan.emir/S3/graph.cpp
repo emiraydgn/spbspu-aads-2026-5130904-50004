@@ -161,3 +161,64 @@ std::vector< aydogan::EdgeInfo > aydogan::Graph::getInbound(const std::string& v
   sortEdges(result);
   return result;
 }
+
+aydogan::Graph aydogan::Graph::mergeWith(const Graph& other) const
+{
+  Graph result(*this);
+
+  for (const std::string& vertex: other.vertices_)
+  {
+    result.addVertexDirect(vertex);
+  }
+
+  for (auto it = other.edges_.cbegin(); it != other.edges_.cend(); ++it)
+  {
+    for (unsigned int weight: it->value)
+    {
+      result.addEdgeDirect(it->key.from, it->key.to, weight);
+    }
+  }
+
+  return result;
+}
+
+aydogan::Graph aydogan::Graph::extractSubgraph(const std::vector< std::string >& selected) const
+{
+  Graph result;
+
+  for (const std::string& vertex: selected)
+  {
+    result.addVertexDirect(vertex);
+  }
+
+  for (auto it = edges_.cbegin(); it != edges_.cend(); ++it)
+  {
+    if (result.hasVertex(it->key.from) && result.hasVertex(it->key.to))
+    {
+      for (unsigned int weight: it->value)
+      {
+        result.addEdgeDirect(it->key.from, it->key.to, weight);
+      }
+    }
+  }
+
+  return result;
+}
+
+void aydogan::Graph::sortVertices()
+{
+  std::sort(vertices_.begin(), vertices_.end());
+}
+
+void aydogan::Graph::sortEdges(std::vector< EdgeInfo >& edges)
+{
+  std::sort(edges.begin(), edges.end(), [](const EdgeInfo& lhs, const EdgeInfo& rhs)
+  {
+    if (lhs.vertex != rhs.vertex)
+    {
+      return lhs.vertex < rhs.vertex;
+    }
+
+    return lhs.weight < rhs.weight;
+  });
+}
