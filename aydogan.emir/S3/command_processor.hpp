@@ -22,6 +22,16 @@ namespace aydogan
     using Tokens = std::vector< std::string >;
     using Handler = void (*)(CommandProcessor&, const Tokens&, std::ostream&);
 
+    void registerCommands();
+    void processLine(const std::string& line, std::ostream& output);
+
+    static Tokens tokenize(const std::string& line);
+    static bool parseUnsigned(const std::string& text, unsigned int& value);
+    static bool hasDuplicates(const std::vector< std::string >& values);
+
+    static void printInvalid(std::ostream& output);
+    static void printEdges(const std::vector< EdgeInfo >& edges, std::ostream& output);
+
     HashTable< std::string, Handler > commandTable_;
     HashTable< std::string, Graph > graphStorage_;
   };
