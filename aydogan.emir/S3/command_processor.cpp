@@ -225,3 +225,116 @@ void aydogan::CommandProcessor::printEdges(
 
   output << "\n";
 }
+
+void aydogan::CommandProcessor::handleGraphs(
+  CommandProcessor& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  if (tokens.size() != 1)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  std::vector< std::string > names;
+
+  for (auto it = processor.graphStorage_.cbegin(); it != processor.graphStorage_.cend(); ++it)
+  {
+    names.push_back(it->key);
+  }
+
+  std::sort(names.begin(), names.end());
+
+  for (const std::string& name: names)
+  {
+    output << name << "\n";
+  }
+
+  if (names.empty())
+  {
+    output << "\n";
+  }
+}
+
+void aydogan::CommandProcessor::handleVertexes(
+  CommandProcessor& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  if (tokens.size() != 2)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Graph* graph = processor.graphStorage_.find(tokens[1]);
+
+  if (graph == nullptr)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  std::vector< std::string > vertices = graph->getVertices();
+
+  std::sort(vertices.begin(), vertices.end());
+
+  for (const std::string& vertex: vertices)
+  {
+    output << vertex << "\n";
+  }
+
+  if (vertices.empty())
+  {
+    output << "\n";
+  }
+}
+
+void aydogan::CommandProcessor::handleOutbound(
+  CommandProcessor& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  if (tokens.size() != 3)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Graph* graph = processor.graphStorage_.find(tokens[1]);
+
+  if (graph == nullptr || !graph->hasVertex(tokens[2]))
+  {
+    printInvalid(output);
+    return;
+  }
+
+  printEdges(graph->getOutbound(tokens[2]), output);
+}
+
+void aydogan::CommandProcessor::handleInbound(
+  CommandProcessor& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  if (tokens.size() != 3)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Graph* graph = processor.graphStorage_.find(tokens[1]);
+
+  if (graph == nullptr || !graph->hasVertex(tokens[2]))
+  {
+    printInvalid(output);
+    return;
+  }
+
+  printEdges(graph->getInbound(tokens[2]), output);
+}
