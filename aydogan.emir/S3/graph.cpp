@@ -20,3 +20,30 @@ aydogan::Graph::Graph():
   vertices_(),
   edges_(16)
 {}
+
+void aydogan::Graph::swap(Graph& other) noexcept
+{
+  vertices_.swap(other.vertices_);
+  edges_.swap(other.edges_);
+}
+
+bool aydogan::Graph::hasVertex(const std::string& vertex) const
+{
+  return std::find(vertices_.begin(), vertices_.end(), vertex) != vertices_.end();
+}
+
+void aydogan::Graph::addVertexDirect(const std::string& vertex)
+{
+  if (!hasVertex(vertex))
+  {
+    vertices_.push_back(vertex);
+    sortVertices();
+  }
+}
+
+void aydogan::Graph::addVertex(const std::string& vertex)
+{
+  Graph copy(*this);
+  copy.addVertexDirect(vertex);
+  swap(copy);
+}
