@@ -1,4 +1,5 @@
 #include "graph.hpp"
+
 #include <algorithm>
 #include <boost/hash2/hash_append.hpp>
 #include <boost/hash2/siphash.hpp>
@@ -46,4 +47,74 @@ void aydogan::Graph::addVertex(const std::string& vertex)
   Graph copy(*this);
   copy.addVertexDirect(vertex);
   swap(copy);
+}
+
+void aydogan::Graph::addEdgeDirect(
+  const std::string& from,
+  const std::string& to,
+  unsigned int weight
+)
+{
+  addVertexDirect(from);
+  addVertexDirect(to);
+
+  EdgeKey key(from, to);
+  WeightList* weights = edges_.find(key);
+
+  if (weights != nullptr)
+  {
+    weights->push_back(weight);
+  }
+  else
+  {
+    WeightList newWeights;
+    newWeights.push_back(weight);
+    edges_.insert(key, newWeights);
+  }
+}
+
+void aydogan::Graph::addEdge(
+  const std::string& from,
+  const std::string& to,
+  unsigned int weight
+)
+{
+  Graph copy(*this);
+  copy.addEdgeDirect(from, to, weight);
+  swap(copy);
+}
+
+bool aydogan::Graph::removeEdge(
+  const std::string& from,
+  const std::string& to,
+  unsigned int weight
+)
+{
+  Graph copy(*this);
+
+  EdgeKey key(from, to);
+  WeightList* weights = copy.edges_.find(key);
+
+  if (weights == nullptr)
+  {
+    return false;
+  }
+
+  for (auto it = weights->begin(); it != weights->end(); ++it)
+  {
+    if (*it == weight)
+    {
+      weights->erase(it);
+
+      if (weights->empty())
+      {
+        copy.edges_.erase(key);
+      }
+
+      swap(copy);
+      return true;
+    }
+  }
+
+  return false;
 }
