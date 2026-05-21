@@ -32,6 +32,16 @@ namespace aydogan
     static void printInvalid(std::ostream& output);
     static void printEdges(const std::vector< EdgeInfo >& edges, std::ostream& output);
 
+    static void handleGraphs(CommandProcessor& processor, const Tokens& tokens, std::ostream& output);
+    static void handleVertexes(CommandProcessor& processor, const Tokens& tokens, std::ostream& output);
+    static void handleOutbound(CommandProcessor& processor, const Tokens& tokens, std::ostream& output);
+    static void handleInbound(CommandProcessor& processor, const Tokens& tokens, std::ostream& output);
+    static void handleBind(CommandProcessor& processor, const Tokens& tokens, std::ostream& output);
+    static void handleCut(CommandProcessor& processor, const Tokens& tokens, std::ostream& output);
+    static void handleCreate(CommandProcessor& processor, const Tokens& tokens, std::ostream& output);
+    static void handleMerge(CommandProcessor& processor, const Tokens& tokens, std::ostream& output);
+    static void handleExtract(CommandProcessor& processor, const Tokens& tokens, std::ostream& output);
+
     HashTable< std::string, Handler > commandTable_;
     HashTable< std::string, Graph > graphStorage_;
   };
