@@ -118,3 +118,46 @@ bool aydogan::Graph::removeEdge(
 
   return false;
 }
+
+std::vector< std::string > aydogan::Graph::getVertices() const
+{
+  return vertices_;
+}
+
+std::vector< aydogan::EdgeInfo > aydogan::Graph::getOutbound(const std::string& vertex) const
+{
+  std::vector< EdgeInfo > result;
+
+  for (auto it = edges_.cbegin(); it != edges_.cend(); ++it)
+  {
+    if (it->key.from == vertex)
+    {
+      for (unsigned int weight: it->value)
+      {
+        result.push_back(EdgeInfo(it->key.to, weight));
+      }
+    }
+  }
+
+  sortEdges(result);
+  return result;
+}
+
+std::vector< aydogan::EdgeInfo > aydogan::Graph::getInbound(const std::string& vertex) const
+{
+  std::vector< EdgeInfo > result;
+
+  for (auto it = edges_.cbegin(); it != edges_.cend(); ++it)
+  {
+    if (it->key.to == vertex)
+    {
+      for (unsigned int weight: it->value)
+      {
+        result.push_back(EdgeInfo(it->key.from, weight));
+      }
+    }
+  }
+
+  sortEdges(result);
+  return result;
+}
