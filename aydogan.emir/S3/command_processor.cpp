@@ -338,3 +338,91 @@ void aydogan::CommandProcessor::handleInbound(
 
   printEdges(graph->getInbound(tokens[2]), output);
 }
+
+void aydogan::CommandProcessor::handleBind(
+  CommandProcessor& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  unsigned int weight = 0;
+
+  if (tokens.size() != 5 || !parseUnsigned(tokens[4], weight))
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Graph* graph = processor.graphStorage_.find(tokens[1]);
+
+  if (graph == nullptr)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  graph->addEdge(tokens[2], tokens[3], weight);
+}
+
+void aydogan::CommandProcessor::handleCut(
+  CommandProcessor& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  unsigned int weight = 0;
+
+  if (tokens.size() != 5 || !parseUnsigned(tokens[4], weight))
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Graph* graph = processor.graphStorage_.find(tokens[1]);
+
+  if (graph == nullptr || !graph->removeEdge(tokens[2], tokens[3], weight))
+  {
+    printInvalid(output);
+  }
+}
+
+void aydogan::CommandProcessor::handleCreate(
+  CommandProcessor& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  unsigned int vertexCount = 0;
+
+  if (tokens.size() < 3 || !parseUnsigned(tokens[2], vertexCount))
+  {
+    printInvalid(output);
+    return;
+  }
+
+  if (
+    tokens.size() != static_cast< std::size_t >(vertexCount) + 3 ||
+    processor.graphStorage_.contains(tokens[1])
+  )
+  {
+    printInvalid(output);
+    return;
+  }
+
+  std::vector< std::string > vertices(tokens.begin() + 3, tokens.end());
+
+  if (hasDuplicates(vertices))
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Graph graph;
+
+  for (const std::string& vertex: vertices)
+  {
+    graph.addVertex(vertex);
+  }
+
+  processor.graphStorage_.insert(tokens[1], graph);
+}
