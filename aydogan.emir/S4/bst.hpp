@@ -38,6 +38,97 @@ namespace aydogan
     };
 
   public:
+    class ConstIterator;
+
+    class Iterator
+    {
+    public:
+      Iterator():
+        node_(nullptr),
+        tree_(nullptr)
+      {}
+
+      std::pair< Key, Value >& operator*() const
+      {
+        return node_->data;
+      }
+
+      std::pair< Key, Value >* operator->() const
+      {
+        return &(node_->data);
+      }
+
+      bool operator==(const Iterator& other) const
+      {
+        return node_ == other.node_ && tree_ == other.tree_;
+      }
+
+      bool operator!=(const Iterator& other) const
+      {
+        return !(*this == other);
+      }
+
+    private:
+      friend class BSTree;
+      friend class ConstIterator;
+
+      Iterator(Node* node, BSTree* tree):
+        node_(node),
+        tree_(tree)
+      {}
+
+      Node* node_;
+      BSTree* tree_;
+    };
+
+    class ConstIterator
+    {
+    public:
+      ConstIterator():
+        node_(nullptr),
+        tree_(nullptr)
+      {}
+
+      ConstIterator(const Iterator& other):
+        node_(other.node_),
+        tree_(other.tree_)
+      {}
+
+      const std::pair< Key, Value >& operator*() const
+      {
+        return node_->data;
+      }
+
+      const std::pair< Key, Value >* operator->() const
+      {
+        return &(node_->data);
+      }
+
+      bool operator==(const ConstIterator& other) const
+      {
+        return node_ == other.node_ && tree_ == other.tree_;
+      }
+
+      bool operator!=(const ConstIterator& other) const
+      {
+        return !(*this == other);
+      }
+
+    private:
+      friend class BSTree;
+
+      ConstIterator(Node* node, const BSTree* tree):
+        node_(node),
+        tree_(tree)
+      {}
+
+      Node* node_;
+      const BSTree* tree_;
+    };
+
+    using iterator = Iterator;
+    using const_iterator = ConstIterator;
+
     BSTree():
       root_(fakeLeaf()),
       size_(0),
@@ -74,6 +165,36 @@ namespace aydogan
       clearNode(root_);
       root_ = fakeLeaf();
       size_ = 0;
+    }
+
+    iterator begin()
+    {
+      return iterator(fakeLeaf(), this);
+    }
+
+    iterator end()
+    {
+      return iterator(fakeLeaf(), this);
+    }
+
+    const_iterator begin() const
+    {
+      return cbegin();
+    }
+
+    const_iterator end() const
+    {
+      return cend();
+    }
+
+    const_iterator cbegin() const
+    {
+      return const_iterator(fakeLeaf(), this);
+    }
+
+    const_iterator cend() const
+    {
+      return const_iterator(fakeLeaf(), this);
     }
 
   private:
