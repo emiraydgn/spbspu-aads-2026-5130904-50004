@@ -153,3 +153,84 @@ void aydogan::DatasetCommands::printInvalid(std::ostream& output)
 {
   output << "<INVALID COMMAND>\n";
 }
+
+void aydogan::DatasetCommands::printDictionary(
+  const std::string& name,
+  const Dictionary& dictionary,
+  std::ostream& output
+)
+{
+  if (dictionary.empty())
+  {
+    output << "<EMPTY>\n";
+    return;
+  }
+
+  output << name;
+
+  for (auto it = dictionary.cbegin(); it != dictionary.cend(); ++it)
+  {
+    output << " " << it->first << " " << it->second;
+  }
+
+  output << "\n";
+}
+
+aydogan::DatasetCommands::Dictionary aydogan::DatasetCommands::makeComplement(
+  const Dictionary& left,
+  const Dictionary& right
+)
+{
+  Dictionary result;
+
+  for (auto it = left.cbegin(); it != left.cend(); ++it)
+  {
+    if (right.find(it->first) == right.cend())
+    {
+      result.push(it->first, it->second);
+    }
+  }
+
+  return result;
+}
+
+aydogan::DatasetCommands::Dictionary aydogan::DatasetCommands::makeIntersection(
+  const Dictionary& left,
+  const Dictionary& right
+)
+{
+  Dictionary result;
+
+  for (auto it = left.cbegin(); it != left.cend(); ++it)
+  {
+    if (right.find(it->first) != right.cend())
+    {
+      result.push(it->first, it->second);
+    }
+  }
+
+  return result;
+}
+
+aydogan::DatasetCommands::Dictionary aydogan::DatasetCommands::makeUnion(
+  const Dictionary& left,
+  const Dictionary& right
+)
+{
+  Dictionary result;
+
+  for (auto it = left.cbegin(); it != left.cend(); ++it)
+  {
+    result.push(it->first, it->second);
+  }
+
+  for (auto it = right.cbegin(); it != right.cend(); ++it)
+  {
+    if (left.find(it->first) == left.cend())
+    {
+      result.push(it->first, it->second);
+    }
+  }
+
+  return result;
+}
