@@ -21,6 +21,77 @@ void aydogan::DatasetCommands::registerCommands()
   commandTable_.push("union", &DatasetCommands::handleUnion);
 }
 
+void aydogan::DatasetCommands::loadFromFile(const std::string& filename)
+{
+  std::ifstream input(filename);
+
+  if (!input)
+  {
+    throw std::runtime_error("Cannot open file");
+  }
+
+  std::string line;
+
+  while (std::getline(input, line))
+  {
+    Tokens tokens = tokenize(line);
+
+    if (tokens.empty())
+    {
+      continue;
+    }
+
+    if ((tokens.size() - 1) % 2 != 0)
+    {
+      continue;
+    }
+
+    Dictionary dictionary;
+
+    for (std::size_t i = 1; i < tokens.size(); i += 2)
+    {
+      unsigned int key = 0;
+
+      if (parseUnsigned(tokens[i], key))
+      {
+        dictionary.push(key, tokens[i + 1]);
+      }
+    }
+
+    dictionaries_.push(tokens[0], dictionary);
+  }
+}
+
+void aydogan::DatasetCommands::run(std::istream& input, std::ostream& output)
+{
+  std::string line;
+
+  while (std::getline(input, line))
+  {
+    processLine(line, output);
+  }
+}
+
+void aydogan::DatasetCommands::processLine(const std::string& line, std::ostream& output)
+{
+  Tokens tokens = tokenize(line);
+
+  if (tokens.empty())
+  {
+    return;
+  }
+
+  auto handler = commandTable_.find(tokens[0]);
+
+  if (handler == commandTable_.end())
+  {
+    printInvalid(output);
+    return;
+  }
+
+  handler->second(*this, tokens, output);
+}
+
 aydogan::DatasetCommands::Tokens aydogan::DatasetCommands::tokenize(const std::string& line)
 {
   Tokens tokens;
