@@ -187,9 +187,55 @@ namespace aydogan
       compare_()
     {}
 
+    BSTree(const BSTree& other):
+      root_(fakeLeaf()),
+      size_(0),
+      compare_(other.compare_)
+    {
+      for (const_iterator it = other.cbegin(); it != other.cend(); ++it)
+      {
+        push(it->first, it->second);
+      }
+    }
+
+    BSTree(BSTree&& other) noexcept:
+      root_(fakeLeaf()),
+      size_(0),
+      compare_(other.compare_)
+    {
+      swap(other);
+    }
+
     ~BSTree()
     {
       clear();
+    }
+
+    BSTree& operator=(const BSTree& other)
+    {
+      if (this != &other)
+      {
+        BSTree copy(other);
+        swap(copy);
+      }
+      return *this;
+    }
+
+    BSTree& operator=(BSTree&& other) noexcept
+    {
+      if (this != &other)
+      {
+        clear();
+        swap(other);
+      }
+      return *this;
+    }
+
+    void swap(BSTree& other) noexcept
+    {
+      std::swap(root_, other.root_);
+      std::swap(size_, other.size_);
+      std::swap(compare_, other.compare_);
     }
 
     bool isEmpty() const noexcept
@@ -217,6 +263,87 @@ namespace aydogan
       clearNode(root_);
       root_ = fakeLeaf();
       size_ = 0;
+    }
+
+    void push(const Key& key, const Value& value)
+    {
+      if (root_->fake)
+      {
+        root_ = new Node(key, value, nullptr, fakeLeaf());
+        ++size_;
+        return;
+      }
+
+      Node* current = root_;
+      Node* parent = nullptr;
+
+      while (!current->fake)
+      {
+        parent = current;
+
+        if (compare_(key, current->data.first))
+        {
+          current = current->left;
+        }
+        else if (compare_(current->data.first, key))
+        {
+          current = current->right;
+        }
+        else
+        {
+          current->data.second = value;
+          return;
+        }
+      }
+
+      Node* created = new Node(key, value, parent, fakeLeaf());
+
+      if (compare_(key, parent->data.first))
+      {
+        parent->left = created;
+      }
+      else
+      {
+        parent->right = created;
+      }
+
+      ++size_;
+    }
+
+    Value& get(const Key& key)
+    {
+      Node* node = findNode(key);
+
+      if (node->fake)
+      {
+        throw std::out_of_range("Key not found");
+      }
+
+      return node->data.second;
+    }
+
+    const Value& get(const Key& key) const
+    {
+      Node* node = findNode(key);
+
+      if (node->fake)
+      {
+        throw std::out_of_range("Key not found");
+      }
+
+      return node->data.second;
+    }
+
+    iterator find(const Key& key)
+    {
+      Node* node = findNode(key);
+      return iterator(node, this);
+    }
+
+    const_iterator find(const Key& key) const
+    {
+      Node* node = findNode(key);
+      return const_iterator(node, this);
     }
 
     iterator begin()
@@ -253,6 +380,29 @@ namespace aydogan
     static Node* fakeLeaf()
     {
       return &fakeLeaf_;
+    }
+
+    Node* findNode(const Key& key) const
+    {
+      Node* current = root_;
+
+      while (!current->fake)
+      {
+        if (compare_(key, current->data.first))
+        {
+          current = current->left;
+        }
+        else if (compare_(current->data.first, key))
+        {
+          current = current->right;
+        }
+        else
+        {
+          return current;
+        }
+      }
+
+      return fakeLeaf();
     }
 
     Node* leftmost(Node* node) const
