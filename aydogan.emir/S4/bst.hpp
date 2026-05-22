@@ -334,6 +334,21 @@ namespace aydogan
       return node->data.second;
     }
 
+    Value drop(const Key& key)
+    {
+      Node* node = findNode(key);
+
+      if (node->fake)
+      {
+        throw std::out_of_range("Key not found");
+      }
+
+      Value value = node->data.second;
+      eraseNode(node);
+      --size_;
+      return value;
+    }
+
     iterator find(const Key& key)
     {
       Node* node = findNode(key);
@@ -484,6 +499,62 @@ namespace aydogan
       }
 
       return parent == nullptr ? fakeLeaf() : parent;
+    }
+
+    void replaceNode(Node* oldNode, Node* newNode)
+    {
+      if (oldNode->parent == nullptr)
+      {
+        root_ = newNode;
+
+        if (!newNode->fake)
+        {
+          newNode->parent = nullptr;
+        }
+      }
+      else if (oldNode->parent->left == oldNode)
+      {
+        oldNode->parent->left = newNode;
+
+        if (!newNode->fake)
+        {
+          newNode->parent = oldNode->parent;
+        }
+      }
+      else
+      {
+        oldNode->parent->right = newNode;
+
+        if (!newNode->fake)
+        {
+          newNode->parent = oldNode->parent;
+        }
+      }
+    }
+
+    void eraseNode(Node* node)
+    {
+      if (node->left->fake && node->right->fake)
+      {
+        replaceNode(node, fakeLeaf());
+        delete node;
+      }
+      else if (node->left->fake)
+      {
+        replaceNode(node, node->right);
+        delete node;
+      }
+      else if (node->right->fake)
+      {
+        replaceNode(node, node->left);
+        delete node;
+      }
+      else
+      {
+        Node* successor = leftmost(node->right);
+        node->data = successor->data;
+        eraseNode(successor);
+      }
     }
 
     void clearNode(Node* node)
