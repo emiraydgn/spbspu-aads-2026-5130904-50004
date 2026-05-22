@@ -58,6 +58,32 @@ namespace aydogan
         return &(node_->data);
       }
 
+      Iterator& operator++()
+      {
+        node_ = tree_->nextNode(node_);
+        return *this;
+      }
+
+      Iterator operator++(int)
+      {
+        Iterator old(*this);
+        ++(*this);
+        return old;
+      }
+
+      Iterator& operator--()
+      {
+        node_ = tree_->previousNode(node_);
+        return *this;
+      }
+
+      Iterator operator--(int)
+      {
+        Iterator old(*this);
+        --(*this);
+        return old;
+      }
+
       bool operator==(const Iterator& other) const
       {
         return node_ == other.node_ && tree_ == other.tree_;
@@ -102,6 +128,32 @@ namespace aydogan
       const std::pair< Key, Value >* operator->() const
       {
         return &(node_->data);
+      }
+
+      ConstIterator& operator++()
+      {
+        node_ = tree_->nextNode(node_);
+        return *this;
+      }
+
+      ConstIterator operator++(int)
+      {
+        ConstIterator old(*this);
+        ++(*this);
+        return old;
+      }
+
+      ConstIterator& operator--()
+      {
+        node_ = tree_->previousNode(node_);
+        return *this;
+      }
+
+      ConstIterator operator--(int)
+      {
+        ConstIterator old(*this);
+        --(*this);
+        return old;
       }
 
       bool operator==(const ConstIterator& other) const
@@ -169,7 +221,7 @@ namespace aydogan
 
     iterator begin()
     {
-      return iterator(fakeLeaf(), this);
+      return iterator(leftmost(root_), this);
     }
 
     iterator end()
@@ -189,7 +241,7 @@ namespace aydogan
 
     const_iterator cbegin() const
     {
-      return const_iterator(fakeLeaf(), this);
+      return const_iterator(leftmost(root_), this);
     }
 
     const_iterator cend() const
@@ -201,6 +253,87 @@ namespace aydogan
     static Node* fakeLeaf()
     {
       return &fakeLeaf_;
+    }
+
+    Node* leftmost(Node* node) const
+    {
+      if (node == nullptr || node->fake)
+      {
+        return fakeLeaf();
+      }
+
+      while (!node->left->fake)
+      {
+        node = node->left;
+      }
+
+      return node;
+    }
+
+    Node* rightmost(Node* node) const
+    {
+      if (node == nullptr || node->fake)
+      {
+        return fakeLeaf();
+      }
+
+      while (!node->right->fake)
+      {
+        node = node->right;
+      }
+
+      return node;
+    }
+
+    Node* nextNode(Node* node) const
+    {
+      if (node == nullptr || node->fake)
+      {
+        return fakeLeaf();
+      }
+
+      if (!node->right->fake)
+      {
+        return leftmost(node->right);
+      }
+
+      Node* parent = node->parent;
+
+      while (parent != nullptr && parent->right == node)
+      {
+        node = parent;
+        parent = parent->parent;
+      }
+
+      return parent == nullptr ? fakeLeaf() : parent;
+    }
+
+    Node* previousNode(Node* node) const
+    {
+      if (node == nullptr)
+      {
+        return fakeLeaf();
+      }
+
+      if (node->fake)
+      {
+        return rightmost(root_);
+      }
+
+      if (!node->left->fake)
+      {
+        return rightmost(node->left);
+      }
+
+      Node* parent = node->parent;
+
+      while (parent != nullptr && parent->left == node)
+      {
+        node = parent;
+        parent = parent->parent;
+      }
+
+      return parent == nullptr ? fakeLeaf() : parent;
     }
 
     void clearNode(Node* node)
