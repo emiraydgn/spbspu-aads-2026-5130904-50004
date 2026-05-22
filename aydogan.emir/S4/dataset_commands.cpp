@@ -234,3 +234,101 @@ aydogan::DatasetCommands::Dictionary aydogan::DatasetCommands::makeUnion(
 
   return result;
 }
+
+void aydogan::DatasetCommands::handlePrint(
+  DatasetCommands& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  if (tokens.size() != 2)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  auto dictionary = processor.dictionaries_.find(tokens[1]);
+
+  if (dictionary == processor.dictionaries_.end())
+  {
+    printInvalid(output);
+    return;
+  }
+
+  printDictionary(tokens[1], dictionary->second, output);
+}
+
+void aydogan::DatasetCommands::handleComplement(
+  DatasetCommands& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  if (tokens.size() != 4)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  auto left = processor.dictionaries_.find(tokens[2]);
+  auto right = processor.dictionaries_.find(tokens[3]);
+
+  if (left == processor.dictionaries_.end() || right == processor.dictionaries_.end())
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Dictionary result = makeComplement(left->second, right->second);
+  processor.dictionaries_.push(tokens[1], result);
+}
+
+void aydogan::DatasetCommands::handleIntersect(
+  DatasetCommands& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  if (tokens.size() != 4)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  auto left = processor.dictionaries_.find(tokens[2]);
+  auto right = processor.dictionaries_.find(tokens[3]);
+
+  if (left == processor.dictionaries_.end() || right == processor.dictionaries_.end())
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Dictionary result = makeIntersection(left->second, right->second);
+  processor.dictionaries_.push(tokens[1], result);
+}
+
+void aydogan::DatasetCommands::handleUnion(
+  DatasetCommands& processor,
+  const Tokens& tokens,
+  std::ostream& output
+)
+{
+  if (tokens.size() != 4)
+  {
+    printInvalid(output);
+    return;
+  }
+
+  auto left = processor.dictionaries_.find(tokens[2]);
+  auto right = processor.dictionaries_.find(tokens[3]);
+
+  if (left == processor.dictionaries_.end() || right == processor.dictionaries_.end())
+  {
+    printInvalid(output);
+    return;
+  }
+
+  Dictionary result = makeUnion(left->second, right->second);
+  processor.dictionaries_.push(tokens[1], result);
+}
