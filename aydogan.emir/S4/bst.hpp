@@ -391,6 +391,99 @@ namespace aydogan
       return const_iterator(fakeLeaf(), this);
     }
 
+    const_iterator rotateLeft(const_iterator it)
+    {
+      Node* child = it.node_;
+
+      if (child == nullptr || child->fake || child->parent == nullptr)
+      {
+        throw std::logic_error("Invalid rotation");
+      }
+
+      Node* parent = child->parent;
+
+      if (parent->right != child)
+      {
+        throw std::logic_error("Invalid left rotation");
+      }
+
+      Node* grandParent = parent->parent;
+      parent->right = child->left;
+
+      if (!child->left->fake)
+      {
+        child->left->parent = parent;
+      }
+
+      child->left = parent;
+      parent->parent = child;
+      child->parent = grandParent;
+
+      replaceParentChild(grandParent, parent, child);
+
+      return const_iterator(child, this);
+    }
+
+    const_iterator rotateRight(const_iterator it)
+    {
+      Node* child = it.node_;
+
+      if (child == nullptr || child->fake || child->parent == nullptr)
+      {
+        throw std::logic_error("Invalid rotation");
+      }
+
+      Node* parent = child->parent;
+
+      if (parent->left != child)
+      {
+        throw std::logic_error("Invalid right rotation");
+      }
+
+      Node* grandParent = parent->parent;
+      parent->left = child->right;
+
+      if (!child->right->fake)
+      {
+        child->right->parent = parent;
+      }
+
+      child->right = parent;
+      parent->parent = child;
+      child->parent = grandParent;
+
+      replaceParentChild(grandParent, parent, child);
+
+      return const_iterator(child, this);
+    }
+
+    const_iterator rotateLargeLeft(const_iterator it)
+    {
+      const_iterator middle = rotateRight(it);
+      return rotateLeft(middle);
+    }
+
+    const_iterator rotateLargeRight(const_iterator it)
+    {
+      const_iterator middle = rotateLeft(it);
+      return rotateRight(middle);
+    }
+
+    std::size_t height() const
+    {
+      return height(root_);
+    }
+
+    std::size_t height(const_iterator it) const
+    {
+      if (it.node_ == nullptr || it.node_->fake)
+      {
+        return 0;
+      }
+
+      return height(it.node_);
+    }
+
   private:
     static Node* fakeLeaf()
     {
@@ -501,6 +594,23 @@ namespace aydogan
       return parent == nullptr ? fakeLeaf() : parent;
     }
 
+    void replaceParentChild(Node* parent, Node* oldChild, Node* newChild)
+    {
+      if (parent == nullptr)
+      {
+        root_ = newChild;
+        newChild->parent = nullptr;
+      }
+      else if (parent->left == oldChild)
+      {
+        parent->left = newChild;
+      }
+      else
+      {
+        parent->right = newChild;
+      }
+    }
+
     void replaceNode(Node* oldNode, Node* newNode)
     {
       if (oldNode->parent == nullptr)
@@ -567,6 +677,19 @@ namespace aydogan
       clearNode(node->left);
       clearNode(node->right);
       delete node;
+    }
+
+    std::size_t height(Node* node) const
+    {
+      if (node == nullptr || node->fake)
+      {
+        return 0;
+      }
+
+      std::size_t leftHeight = height(node->left);
+      std::size_t rightHeight = height(node->right);
+
+      return (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
     }
 
     Node* root_;
