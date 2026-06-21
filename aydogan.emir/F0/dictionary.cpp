@@ -226,3 +226,32 @@ void differenceDict(std::istream & in, std::ostream &, DictionaryStorage & stora
   }
   storage.emplace(result, diff);
 }
+
+void countDict(std::istream & in, std::ostream & out, DictionaryStorage & storage)
+{
+  std::string name;
+  in >> name;
+  if (!storage.count(name)) {
+    throw std::logic_error("dictionary not found");
+  }
+  out << storage.at(name).count() << "\n";
+}
+
+void help(std::istream &, std::ostream & out, DictionaryStorage &)
+{
+  out << "Commands:\n";
+  out << "  create-dict <dict>\n";
+  out << "  show <dict>\n";
+  out << "  drop-dict <dict>\n";
+  out << "  add-word <dict> <word> <translation>\n";
+  out << "  remove-word <dict> <word>\n";
+  out << "  add-translation <dict> <word> <translation>\n";
+  out << "  remove-translation <dict> <word> <translation>\n";
+  out << "  translate <dict> <word>\n";
+  out << "  merge-dict <result> <dict1> <dict2> ... <dictk>\n";
+  out << "  union <result> <dict1> <dict2> ... <dictk>\n";
+  out << "  difference <result> <dict1> <dict2> ... <dictk>\n";
+  out << "  count <dict>\n";
+  out << "  help\n";
+  out << "  exit\n";
+}
