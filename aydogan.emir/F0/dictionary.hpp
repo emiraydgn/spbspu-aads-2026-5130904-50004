@@ -14,4 +14,19 @@ void createDict(std::istream &, std::ostream &, DictionaryStorage &);
 void showDict(std::istream &, std::ostream &, DictionaryStorage &);
 void dropDict(std::istream &, std::ostream &, DictionaryStorage &);
 
+void addWord(std::istream &, std::ostream &, DictionaryStorage &);
+void removeWord(std::istream &, std::ostream &, DictionaryStorage &);
+
+void addTranslation(std::istream &, std::ostream &, DictionaryStorage &);
+void removeTranslation(std::istream &, std::ostream &, DictionaryStorage &);
+
+void translate(std::istream &, std::ostream &, DictionaryStorage &);
+
+void mergeDict(std::istream &, std::ostream &, DictionaryStorage &);
+void unionDict(std::istream &, std::ostream &, DictionaryStorage &);
+void differenceDict(std::istream &, std::ostream &, DictionaryStorage &);
+
+void countDict(std::istream &, std::ostream &, DictionaryStorage &);
+void help(std::istream &, std::ostream &, DictionaryStorage &);
+
 #endif
