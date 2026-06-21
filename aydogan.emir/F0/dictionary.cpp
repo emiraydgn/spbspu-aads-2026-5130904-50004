@@ -1,5 +1,7 @@
 #include "dictionary.hpp"
 #include <iomanip>
+#include <sstream>
+#include <vector>
 #include <stdexcept>
 
 void createDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
@@ -90,4 +92,83 @@ void translate(std::istream & in, std::ostream & out, DictionaryStorage & storag
     first = false;
   }
   out << ">\n";
+}
+
+namespace {
+
+  std::vector< std::string > readDictNames(std::istream & in)
+  {
+    std::string line;
+    std::getline(in, line);
+    std::istringstream iss(line);
+    std::vector< std::string > dicts;
+    std::string name;
+    while (iss >> name) {
+      dicts.push_back(name);
+    }
+    return dicts;
+  }
+
+  void checkDictsExist(const std::vector< std::string > & dicts, const DictionaryStorage & storage)
+  {
+    for (const auto & d : dicts) {
+      if (!storage.count(d)) {
+        throw std::logic_error("dictionary not found: " + d);
+      }
+    }
+  }
+
+  void addWordToDict(Dictionary & dict, const std::string & key, const std::list< std::string > & translations)
+  {
+    bool first = true;
+    for (const auto & t : translations) {
+      if (first) {
+        dict.insert(key, t);
+        first = false;
+      } else {
+        dict.addTranslation(key, t);
+      }
+    }
+  }
+
+}
+
+void mergeDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
+{
+  std::string result;
+  in >> result;
+  if (storage.count(result)) {
+    throw std::logic_error("dictionary already exists");
+  }
+  std::vector< std::string > dicts = readDictNames(in);
+  if (dicts.empty()) {
+    throw std::logic_error("no dictionaries specified");
+  }
+  checkDictsExist(dicts, storage);
+
+  Dictionary merged;
+  for (const auto & d : dicts) {
+    for (const auto & key : storage.at(d).keys()) {
+      std::list< std::string > translations = storage.at(d).get(key);
+      if (!merged.contains(key)) {
+        addWordToDict(merged, key, translations);
+      } else {
+        std::list< std::string > existing = merged.get(key);
+        for (const auto & t : translations) {
+          bool found = false;
+          for (const auto & et : existing) {
+            if (et == t) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            merged.addTranslation(key, t);
+            existing.push_back(t);
+          }
+        }
+      }
+    }
+  }
+  storage.emplace(result, merged);
 }
