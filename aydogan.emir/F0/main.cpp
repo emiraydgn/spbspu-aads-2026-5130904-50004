@@ -24,6 +24,8 @@ int main()
   cmds["union"] = unionDict;
   cmds["difference"] = differenceDict;
   cmds["count"] = countDict;
+  cmds["save"] = saveDict;
+  cmds["load"] = loadDict;
   cmds["help"] = help;
 
   std::string cmd;
