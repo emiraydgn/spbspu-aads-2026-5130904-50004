@@ -51,3 +51,65 @@ std::size_t HashTable::probe(const std::string & key, std::size_t i) const
 {
   return (hash1(key) + i * hash2(key)) % size_;
 }
+
+void HashTable::insert(const std::string & key, const std::string & value)
+{
+  if (count_ >= size_ / 2) {
+    rehash();
+  }
+
+  std::size_t insertIdx = size_;
+  bool foundDeleted = false;
+
+  for (std::size_t i = 0; i < size_; ++i) {
+    std::size_t idx = probe(key, i);
+
+    if (table_[idx].occupied && !table_[idx].deleted && table_[idx].key == key) {
+      throw std::logic_error("word already exists");
+    }
+
+    if (table_[idx].occupied && table_[idx].deleted && !foundDeleted) {
+      insertIdx = idx;
+      foundDeleted = true;
+    }
+
+    if (!table_[idx].occupied) {
+      if (!foundDeleted) {
+        insertIdx = idx;
+      }
+      table_[insertIdx].key = key;
+      table_[insertIdx].translations = { value };
+      table_[insertIdx].occupied = true;
+      table_[insertIdx].deleted = false;
+      ++count_;
+      return;
+    }
+  }
+
+  if (foundDeleted) {
+    table_[insertIdx].key = key;
+    table_[insertIdx].translations = { value };
+    table_[insertIdx].occupied = true;
+    table_[insertIdx].deleted = false;
+    ++count_;
+    return;
+  }
+
+  throw std::logic_error("hash table is full");
+}
+
+void HashTable::remove(const std::string & key)
+{
+  for (std::size_t i = 0; i < size_; ++i) {
+    std::size_t idx = probe(key, i);
+    if (!table_[idx].occupied && !table_[idx].deleted) {
+      break;
+    }
+    if (table_[idx].occupied && !table_[idx].deleted && table_[idx].key == key) {
+      table_[idx].deleted = true;
+      --count_;
+      return;
+    }
+  }
+  throw std::logic_error("word not found");
+}
