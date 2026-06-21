@@ -26,5 +26,26 @@ int main()
   cmds["count"] = countDict;
   cmds["help"] = help;
 
+  std::string cmd;
+  while (std::cin >> cmd) {
+    if (cmd == "exit") {
+      break;
+    }
+
+    try {
+      cmds.at(cmd)(std::cin, std::cout, storage);
+    } catch (const std::out_of_range &) {
+      std::cout << "<INVALID COMMAND>\n";
+      std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+    } catch (const std::logic_error & e) {
+      std::cout << "<INVALID COMMAND: " << e.what() << ">\n";
+    }
+  }
+
+  if (!std::cin.eof() && cmd != "exit") {
+    std::cerr << "Bad input\n";
+    return 1;
+  }
+
   return 0;
 }
