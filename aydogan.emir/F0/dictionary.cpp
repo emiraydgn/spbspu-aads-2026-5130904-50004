@@ -31,3 +31,23 @@ void dropDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
   }
   storage.erase(name);
 }
+
+void addWord(std::istream & in, std::ostream &, DictionaryStorage & storage)
+{
+  std::string dict, word, translation;
+  in >> dict >> word >> std::quoted(translation);
+  if (!storage.count(dict)) {
+    throw std::logic_error("dictionary not found");
+  }
+  storage.at(dict).insert(word, translation);
+}
+
+void removeWord(std::istream & in, std::ostream &, DictionaryStorage & storage)
+{
+  std::string dict, word;
+  in >> dict >> word;
+  if (!storage.count(dict)) {
+    throw std::logic_error("dictionary not found");
+  }
+  storage.at(dict).remove(word);
+}
