@@ -113,3 +113,42 @@ void HashTable::remove(const std::string & key)
   }
   throw std::logic_error("word not found");
 }
+
+void HashTable::addTranslation(const std::string & key, const std::string & value)
+{
+  for (std::size_t i = 0; i < size_; ++i) {
+    std::size_t idx = probe(key, i);
+    if (!table_[idx].occupied && !table_[idx].deleted) {
+      break;
+    }
+    if (table_[idx].occupied && !table_[idx].deleted && table_[idx].key == key) {
+      table_[idx].translations.push_back(value);
+      return;
+    }
+  }
+  throw std::logic_error("word not found");
+}
+
+void HashTable::removeTranslation(const std::string & key, const std::string & value)
+{
+  for (std::size_t i = 0; i < size_; ++i) {
+    std::size_t idx = probe(key, i);
+    if (!table_[idx].occupied && !table_[idx].deleted) {
+      break;
+    }
+    if (table_[idx].occupied && !table_[idx].deleted && table_[idx].key == key) {
+      auto & lst = table_[idx].translations;
+      auto it = std::find(lst.begin(), lst.end(), value);
+      if (it == lst.end()) {
+        throw std::logic_error("translation not found");
+      }
+      lst.erase(it);
+      if (lst.empty()) {
+        table_[idx].deleted = true;
+        --count_;
+      }
+      return;
+    }
+  }
+  throw std::logic_error("word not found");
+}
