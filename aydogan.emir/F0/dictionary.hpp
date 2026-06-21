@@ -29,4 +29,7 @@ void differenceDict(std::istream &, std::ostream &, DictionaryStorage &);
 void countDict(std::istream &, std::ostream &, DictionaryStorage &);
 void help(std::istream &, std::ostream &, DictionaryStorage &);
 
+void saveDict(std::istream &, std::ostream &, DictionaryStorage &);
+void loadDict(std::istream &, std::ostream &, DictionaryStorage &);
+
 #endif
