@@ -1,4 +1,5 @@
 #include "dictionary.hpp"
+#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <vector>
@@ -252,6 +253,62 @@ void help(std::istream &, std::ostream & out, DictionaryStorage &)
   out << "  union <result> <dict1> <dict2> ... <dictk>\n";
   out << "  difference <result> <dict1> <dict2> ... <dictk>\n";
   out << "  count <dict>\n";
+  out << "  save <dict> <filename>\n";
+  out << "  load <dict> <filename>\n";
   out << "  help\n";
   out << "  exit\n";
+}
+
+void saveDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
+{
+  std::string dict, filename;
+  in >> dict >> filename;
+  if (!storage.count(dict)) {
+    throw std::logic_error("dictionary not found");
+  }
+  std::ofstream file(filename);
+  if (!file) {
+    throw std::logic_error("cannot open file");
+  }
+  for (const auto & key : storage.at(dict).keys()) {
+    file << key;
+    for (const auto & t : storage.at(dict).get(key)) {
+      file << ' ' << std::quoted(t);
+    }
+    file << '\n';
+  }
+}
+
+void loadDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
+{
+  std::string dict, filename;
+  in >> dict >> filename;
+  if (storage.count(dict)) {
+    throw std::logic_error("dictionary already exists");
+  }
+  std::ifstream file(filename);
+  if (!file) {
+    throw std::logic_error("cannot open file");
+  }
+  Dictionary newDict;
+  std::string line;
+  while (std::getline(file, line)) {
+    if (line.empty()) {
+      continue;
+    }
+    std::istringstream iss(line);
+    std::string word;
+    iss >> word;
+    std::string translation;
+    bool first = true;
+    while (iss >> std::quoted(translation)) {
+      if (first) {
+        newDict.insert(word, translation);
+        first = false;
+      } else {
+        newDict.addTranslation(word, translation);
+      }
+    }
+  }
+  storage.emplace(dict, newDict);
 }
