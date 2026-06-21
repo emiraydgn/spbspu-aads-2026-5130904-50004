@@ -152,3 +152,75 @@ void HashTable::removeTranslation(const std::string & key, const std::string & v
   }
   throw std::logic_error("word not found");
 }
+
+std::list< std::string > HashTable::get(const std::string & key) const
+{
+  for (std::size_t i = 0; i < size_; ++i) {
+    std::size_t idx = probe(key, i);
+    if (!table_[idx].occupied && !table_[idx].deleted) {
+      break;
+    }
+    if (table_[idx].occupied && !table_[idx].deleted && table_[idx].key == key) {
+      return table_[idx].translations;
+    }
+  }
+  throw std::logic_error("word not found");
+}
+
+bool HashTable::contains(const std::string & key) const
+{
+  for (std::size_t i = 0; i < size_; ++i) {
+    std::size_t idx = probe(key, i);
+    if (!table_[idx].occupied && !table_[idx].deleted) {
+      return false;
+    }
+    if (table_[idx].occupied && !table_[idx].deleted && table_[idx].key == key) {
+      return true;
+    }
+  }
+  return false;
+}
+
+std::size_t HashTable::count() const
+{
+  return count_;
+}
+
+std::vector< std::string > HashTable::keys() const
+{
+  std::vector< std::string > result;
+  for (const auto & entry : table_) {
+    if (entry.occupied && !entry.deleted) {
+      result.push_back(entry.key);
+    }
+  }
+  return result;
+}
+
+void HashTable::clear()
+{
+  table_.assign(size_, Entry());
+  count_ = 0;
+}
+
+void HashTable::rehash()
+{
+  std::size_t newSize = nextPrime(size_ * 2);
+  std::vector< Entry > oldTable = table_;
+  table_.assign(newSize, Entry());
+  size_ = newSize;
+  count_ = 0;
+  for (const auto & entry : oldTable) {
+    if (entry.occupied && !entry.deleted) {
+      bool first = true;
+      for (const auto & translation : entry.translations) {
+        if (first) {
+          insert(entry.key, translation);
+          first = false;
+        } else {
+          addTranslation(entry.key, translation);
+        }
+      }
+    }
+  }
+}
