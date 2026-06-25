@@ -1,9 +1,10 @@
 #ifndef STACK_HPP
 #define STACK_HPP
 
-#include "../common/list.hpp"
 #include <stdexcept>
 #include <utility>
+
+#include "../common/list.hpp"
 
 namespace aydogan
 {
@@ -11,61 +12,67 @@ namespace aydogan
   class Stack
   {
   public:
-    Stack() = default;
-    Stack(const Stack&) = default;
-    Stack(Stack&&) = default;
-    Stack& operator=(const Stack&) = default;
-    Stack& operator=(Stack&&) = default;
-    ~Stack() = default;
-
-    bool empty() const noexcept
-    {
-      return data_.empty();
-    }
-
-    void push(const T& rhs)
-    {
-      data_.push_front(rhs);
-    }
-
-    void push(T&& rhs)
-    {
-      data_.push_front(std::move(rhs));
-    }
-
-    T& top()
-    {
-      if (empty())
-      {
-        throw std::out_of_range("Stack is empty");
-      }
-      return data_.front();
-    }
-
-    const T& top() const
-    {
-      if (empty())
-      {
-        throw std::out_of_range("Stack is empty");
-      }
-      return data_.front();
-    }
-
-    T drop()
-    {
-      if (empty())
-      {
-        throw std::out_of_range("Stack is empty");
-      }
-
-      T value = std::move(data_.front());
-      data_.pop_front();
-      return value;
-    }
+    bool empty() const noexcept;
+    void push(const T& rhs);
+    void push(T&& rhs);
+    T& top();
+    const T& top() const;
+    T drop();
 
   private:
     List< T > data_;
   };
+
+  template< class T >
+  bool Stack< T >::empty() const noexcept
+  {
+    return data_.empty();
+  }
+
+  template< class T >
+  void Stack< T >::push(const T& rhs)
+  {
+    data_.push_front(rhs);
+  }
+
+  template< class T >
+  void Stack< T >::push(T&& rhs)
+  {
+    data_.push_front(std::move(rhs));
+  }
+
+  template< class T >
+  T& Stack< T >::top()
+  {
+    if (empty())
+    {
+      throw std::out_of_range("Stack is empty");
+    }
+    return data_.front();
+  }
+
+  template< class T >
+  const T& Stack< T >::top() const
+  {
+    if (empty())
+    {
+      throw std::out_of_range("Stack is empty");
+    }
+    return data_.front();
+  }
+
+  template< class T >
+  T Stack< T >::drop()
+  {
+    if (empty())
+    {
+      throw std::out_of_range("Stack is empty");
+    }
+
+    T value = std::move(data_.front());
+    data_.pop_front();
+    return value;
+  }
 }
 
 #endif
