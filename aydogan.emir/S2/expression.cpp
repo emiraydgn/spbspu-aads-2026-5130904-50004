@@ -375,6 +375,49 @@ namespace
 
     return result;
   }
+
+  bool isBlankLine(const std::string& line)
+  {
+    for (char c: line)
+    {
+      if (!std::isspace(static_cast< unsigned char >(c)))
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  void readResults(std::istream& in, aydogan::Stack< long long >& results)
+  {
+    std::string line;
+
+    while (std::getline(in, line))
+    {
+      if (!isBlankLine(line))
+      {
+        results.push(aydogan::calculateExpression(line));
+      }
+    }
+  }
+
+  void printResults(aydogan::Stack< long long >& results, std::ostream& out)
+  {
+    if (!results.empty())
+    {
+      out << results.top();
+      results.pop();
+
+      while (!results.empty())
+      {
+        out << " " << results.top();
+        results.pop();
+      }
+
+      out << "\n";
+    }
+  }
 }
 
 long long aydogan::calculateExpression(const std::string& expression)
@@ -386,46 +429,16 @@ long long aydogan::calculateExpression(const std::string& expression)
 int aydogan::run(std::istream& in, std::ostream& out, std::ostream& err)
 {
   Stack< long long > results;
-  std::string line;
 
-  while (std::getline(in, line))
+  try
   {
-    bool onlySpaces = true;
-    for (char c: line)
-    {
-      if (!std::isspace(static_cast< unsigned char >(c)))
-      {
-        onlySpaces = false;
-        break;
-      }
-    }
-
-    if (onlySpaces)
-    {
-      continue;
-    }
-
-    try
-    {
-      results.push(calculateExpression(line));
-    }
-    catch (const std::exception& e)
-    {
-      err << e.what() << "\n";
-      return 1;
-    }
+    readResults(in, results);
+    printResults(results, out);
   }
-
-  if (!results.empty())
+  catch (const std::exception& e)
   {
-    out << results.pop();
-
-    while (!results.empty())
-    {
-      out << " " << results.pop();
-    }
-
-    out << "\n";
+    err << e.what() << "\n";
+    return 1;
   }
 
   return 0;
