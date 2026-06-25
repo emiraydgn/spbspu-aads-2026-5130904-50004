@@ -9,6 +9,56 @@
 #include <string>
 #include <utility>
 
+namespace
+{
+  using IteratorList = aydogan::List< aydogan::ConstIterator< unsigned long long > >;
+
+  bool printRowAndCalculateSum(IteratorList& iters,
+    const aydogan::SequenceList& data,
+    std::ostream& out,
+    unsigned long long& currentSum,
+    bool& overflow)
+  {
+    bool rowHasValues = false;
+    const unsigned long long maxValue =
+      std::numeric_limits< unsigned long long >::max();
+
+    auto iterNode = iters.begin();
+    auto seqNode = data.cbegin();
+
+    while (iterNode != iters.end())
+    {
+      if (*iterNode != seqNode->second.cend())
+      {
+        unsigned long long value = **iterNode;
+
+        if (rowHasValues)
+        {
+          out << " ";
+        }
+        out << value;
+
+        if (maxValue - currentSum < value)
+        {
+          overflow = true;
+        }
+        else
+        {
+          currentSum += value;
+        }
+
+        ++(*iterNode);
+        rowHasValues = true;
+      }
+
+      ++iterNode;
+      ++seqNode;
+    }
+
+    return rowHasValues;
+  }
+}
+
 namespace aydogan
 {
   void readInput(std::istream& in, SequenceList& data)
@@ -87,67 +137,33 @@ namespace aydogan
     List< unsigned long long > sums;
     auto sumTail = sums.beforeBegin();
 
-    bool hasMore = true;
-
-    while (hasMore)
+    while (true)
     {
-      hasMore = false;
-
       unsigned long long currentSum = 0;
       bool overflow = false;
-      bool rowHasValues = false;
 
-      auto iterNode = iters.begin();
-      auto seqNode = data.cbegin();
+      bool rowHasValues = printRowAndCalculateSum(
+        iters,
+        data,
+        out,
+        currentSum,
+        overflow
+      );
 
-      bool firstValue = true;
-
-      while (iterNode != iters.end())
+      if (!rowHasValues)
       {
-        if (*iterNode != seqNode->second.cend())
-        {
-          unsigned long long value = **iterNode;
-
-          if (!firstValue)
-          {
-            out << " ";
-          }
-          out << value;
-
-          const unsigned long long maxValue =
-            std::numeric_limits< unsigned long long >::max();
-
-          if (maxValue - currentSum < value)
-          {
-            overflow = true;
-          }
-          else
-          {
-            currentSum += value;
-          }
-
-          ++(*iterNode);
-          hasMore = true;
-          rowHasValues = true;
-          firstValue = false;
-        }
-
-        ++iterNode;
-        ++seqNode;
+        break;
       }
 
-      if (rowHasValues)
+      out << "\n";
+
+      if (overflow)
       {
-        out << "\n";
-
-        if (overflow)
-        {
-          err << "Overflow\n";
-          return 1;
-        }
-
-        sumTail = sums.insertAfter(sumTail, currentSum);
+        err << "Overflow\n";
+        return 1;
       }
+
+      sumTail = sums.insertAfter(sumTail, currentSum);
     }
 
     if (sums.empty())
