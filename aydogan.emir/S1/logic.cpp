@@ -62,15 +62,14 @@ namespace aydogan
 
   void printNames(const SequenceList& data, std::ostream& out)
   {
-    bool firstName = true;
-    for (auto it = data.cbegin(); it != data.cend(); ++it)
+    auto it = data.cbegin();
+
+    out << it->first;
+    ++it;
+
+    for (; it != data.cend(); ++it)
     {
-      if (!firstName)
-      {
-        out << " ";
-      }
-      out << it->first;
-      firstName = false;
+      out << " " << it->first;
     }
     out << "\n";
   }
@@ -157,15 +156,14 @@ namespace aydogan
     }
     else
     {
-      bool firstSum = true;
-      for (auto it = sums.cbegin(); it != sums.cend(); ++it)
+      auto sumIt = sums.cbegin();
+
+      out << *sumIt;
+      ++sumIt;
+
+      for (; sumIt != sums.cend(); ++sumIt)
       {
-        if (!firstSum)
-        {
-          out << " ";
-        }
-        out << *it;
-        firstSum = false;
+        out << " " << *sumIt;
       }
       out << "\n";
     }
