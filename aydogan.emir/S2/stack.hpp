@@ -17,7 +17,7 @@ namespace aydogan
     void push(T&& rhs);
     T& top();
     const T& top() const;
-    T drop();
+    T pop();
 
   private:
     List< T > data_;
@@ -62,7 +62,7 @@ namespace aydogan
   }
 
   template< class T >
-  T Stack< T >::drop()
+  T Stack< T >::pop()
   {
     if (empty())
     {

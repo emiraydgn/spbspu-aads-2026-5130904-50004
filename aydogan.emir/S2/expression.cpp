@@ -272,7 +272,7 @@ namespace
       {
         while (!operators.empty() && operators.top() != "(")
         {
-          output.push(operators.drop());
+          output.push(operators.pop());
         }
 
         if (operators.empty())
@@ -280,7 +280,7 @@ namespace
           throw std::runtime_error("Invalid expression");
         }
 
-        operators.drop();
+        operators.pop();
       }
       else if (isOperator(token))
       {
@@ -303,7 +303,7 @@ namespace
             break;
           }
 
-          output.push(operators.drop());
+          output.push(operators.pop());
         }
 
         operators.push(token);
@@ -321,7 +321,7 @@ namespace
         throw std::runtime_error("Invalid expression");
       }
 
-      output.push(operators.drop());
+      output.push(operators.pop());
     }
 
     return output;
@@ -345,13 +345,13 @@ namespace
         {
           throw std::runtime_error("Invalid expression");
         }
-        long long rhs = values.drop();
+        long long rhs = values.pop();
 
         if (values.empty())
         {
           throw std::runtime_error("Invalid expression");
         }
-        long long lhs = values.drop();
+        long long lhs = values.pop();
 
         values.push(applyOperator(lhs, rhs, token));
       }
@@ -366,7 +366,7 @@ namespace
       throw std::runtime_error("Invalid expression");
     }
 
-    long long result = values.drop();
+    long long result = values.pop();
 
     if (!values.empty())
     {
@@ -418,11 +418,11 @@ int aydogan::run(std::istream& in, std::ostream& out, std::ostream& err)
 
   if (!results.empty())
   {
-    out << results.drop();
+    out << results.pop();
 
     while (!results.empty())
     {
-      out << " " << results.drop();
+      out << " " << results.pop();
     }
 
     out << "\n";

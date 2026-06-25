@@ -15,9 +15,9 @@ BOOST_AUTO_TEST_CASE(stack_test)
   st.push(3);
 
   BOOST_CHECK_EQUAL(st.top(), 3);
-  BOOST_CHECK_EQUAL(st.drop(), 3);
-  BOOST_CHECK_EQUAL(st.drop(), 2);
-  BOOST_CHECK_EQUAL(st.drop(), 1);
+  BOOST_CHECK_EQUAL(st.pop(), 3);
+  BOOST_CHECK_EQUAL(st.pop(), 2);
+  BOOST_CHECK_EQUAL(st.pop(), 1);
   BOOST_CHECK(st.empty());
 }
 
