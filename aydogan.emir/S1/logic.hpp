@@ -14,11 +14,7 @@ namespace aydogan
 
   void readInput(std::istream& in, SequenceList& data);
 
-  int runProgram(
-    const SequenceList& data,
-    std::ostream& out,
-    std::ostream& err
-  );
+  int runProgram(const SequenceList& data, std::ostream& out, std::ostream& err);
 }
 
 #endif
