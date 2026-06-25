@@ -4,155 +4,12 @@
 #include <stdexcept>
 #include <utility>
 
+#include "const_iterator.hpp"
+#include "iterator.hpp"
+#include "node.hpp"
+
 namespace aydogan
 {
-  template< class T >
-  class List;
-
-  template< class T >
-  class Iterator;
-
-  template< class T >
-  class ConstIterator;
-
-  namespace detail
-  {
-    template< class T >
-    struct Node
-    {
-      T data;
-      Node* next;
-
-      Node():
-        data(),
-        next(nullptr)
-      {}
-
-      Node(const T& value, Node* nextNode):
-        data(value),
-        next(nextNode)
-      {}
-
-      Node(T&& value, Node* nextNode):
-        data(std::move(value)),
-        next(nextNode)
-      {}
-    };
-  }
-
-  template< class T >
-  class Iterator
-  {
-    friend class List< T >;
-    friend class ConstIterator< T >;
-
-  public:
-    Iterator():
-      node_(nullptr)
-    {}
-
-    T& operator*() const
-    {
-      return node_->data;
-    }
-
-    T* operator->() const
-    {
-      return &(node_->data);
-    }
-
-    Iterator& operator++()
-    {
-      if (node_ != nullptr)
-      {
-        node_ = node_->next;
-      }
-      return *this;
-    }
-
-    Iterator operator++(int)
-    {
-      Iterator tmp(*this);
-      ++(*this);
-      return tmp;
-    }
-
-    bool operator==(const Iterator& other) const
-    {
-      return node_ == other.node_;
-    }
-
-    bool operator!=(const Iterator& other) const
-    {
-      return node_ != other.node_;
-    }
-
-  private:
-    explicit Iterator(detail::Node< T >* node):
-      node_(node)
-    {}
-
-    detail::Node< T >* node_;
-  };
-
-  template< class T >
-  class ConstIterator
-  {
-    friend class List< T >;
-
-  public:
-    ConstIterator():
-      node_(nullptr)
-    {}
-
-    ConstIterator(const Iterator< T >& other):
-      node_(other.node_)
-    {}
-
-    const T& operator*() const
-    {
-      return node_->data;
-    }
-
-    const T* operator->() const
-    {
-      return &(node_->data);
-    }
-
-    ConstIterator& operator++()
-    {
-      if (node_ != nullptr)
-      {
-        node_ = node_->next;
-      }
-      return *this;
-    }
-
-    ConstIterator operator++(int)
-    {
-      ConstIterator tmp(*this);
-      ++(*this);
-      return tmp;
-    }
-
-    bool operator==(const ConstIterator& other) const
-    {
-      return node_ == other.node_;
-    }
-
-    bool operator!=(const ConstIterator& other) const
-    {
-      return node_ != other.node_;
-    }
-
-  private:
-    explicit ConstIterator(const detail::Node< T >* node):
-      node_(node)
-    {}
-
-    const detail::Node< T >* node_;
-  };
-
   template< class T >
   class List
   {
@@ -246,7 +103,7 @@ namespace aydogan
     Iterator< T > end() noexcept
     {
       return Iterator< T >(nullptr);
-}
+    }
 
     ConstIterator< T > end() const noexcept
     {
