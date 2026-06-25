@@ -1,10 +1,11 @@
 #ifndef LOGIC_HPP
 #define LOGIC_HPP
 
-#include "list.hpp"
 #include <iosfwd>
 #include <string>
 #include <utility>
+
+#include "list.hpp"
 
 namespace aydogan
 {
@@ -13,8 +14,8 @@ namespace aydogan
   using SequenceList = List< NamedSequence >;
 
   void readInput(std::istream& in, SequenceList& data);
-
-  int runProgram(const SequenceList& data, std::ostream& out, std::ostream& err);
+  void printNames(const SequenceList& data, std::ostream& out);
+  int printRowsAndSums(const SequenceList& data, std::ostream& out, std::ostream& err);
 }
 
 #endif

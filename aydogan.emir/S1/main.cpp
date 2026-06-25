@@ -1,7 +1,8 @@
-#include "logic.hpp"
 #include <exception>
 #include <iostream>
 #include <stdexcept>
+
+#include "logic.hpp"
 
 int main()
 {
@@ -10,7 +11,15 @@ int main()
   try
   {
     aydogan::readInput(std::cin, data);
-    return aydogan::runProgram(data, std::cout, std::cerr);
+
+    if (data.empty())
+    {
+      std::cout << "0\n";
+      return 0;
+    }
+
+    aydogan::printNames(data, std::cout);
+    return aydogan::printRowsAndSums(data, std::cout, std::cerr);
   }
   catch (const std::overflow_error& e)
   {

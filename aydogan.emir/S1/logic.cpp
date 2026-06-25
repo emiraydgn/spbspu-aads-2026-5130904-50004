@@ -60,14 +60,8 @@ namespace aydogan
     }
   }
 
-  int runProgram(const SequenceList& data, std::ostream& out, std::ostream& err)
+  void printNames(const SequenceList& data, std::ostream& out)
   {
-    if (data.empty())
-    {
-      out << "0\n";
-      return 0;
-    }
-
     bool firstName = true;
     for (auto it = data.cbegin(); it != data.cend(); ++it)
     {
@@ -79,7 +73,10 @@ namespace aydogan
       firstName = false;
     }
     out << "\n";
+  }
 
+  int printRowsAndSums(const SequenceList& data, std::ostream& out, std::ostream& err)
+  {
     List< ConstIterator< unsigned long long > > iters;
     auto iterTail = iters.beforeBegin();
 
@@ -118,7 +115,10 @@ namespace aydogan
           }
           out << value;
 
-          if (std::numeric_limits< unsigned long long >::max() - currentSum < value)
+          const unsigned long long maxValue =
+            std::numeric_limits< unsigned long long >::max();
+
+          if (maxValue - currentSum < value)
           {
             overflow = true;
           }
