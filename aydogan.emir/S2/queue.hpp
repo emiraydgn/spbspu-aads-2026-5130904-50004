@@ -23,7 +23,7 @@ namespace aydogan
     void push(T&& rhs);
     T& front();
     const T& front() const;
-    T drop();
+    T pop();
 
   private:
     void rebuildTail();
@@ -131,7 +131,7 @@ namespace aydogan
   }
 
   template< class T >
-  T Queue< T >::drop()
+  T Queue< T >::pop()
   {
     if (empty())
     {

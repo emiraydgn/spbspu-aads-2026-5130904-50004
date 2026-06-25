@@ -31,9 +31,9 @@ BOOST_AUTO_TEST_CASE(queue_test)
   q.push(30);
 
   BOOST_CHECK_EQUAL(q.front(), 10);
-  BOOST_CHECK_EQUAL(q.drop(), 10);
-  BOOST_CHECK_EQUAL(q.drop(), 20);
-  BOOST_CHECK_EQUAL(q.drop(), 30);
+  BOOST_CHECK_EQUAL(q.pop(), 10);
+  BOOST_CHECK_EQUAL(q.pop(), 20);
+  BOOST_CHECK_EQUAL(q.pop(), 30);
   BOOST_CHECK(q.empty());
 }
 

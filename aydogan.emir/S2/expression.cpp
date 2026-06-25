@@ -333,7 +333,7 @@ namespace
 
     while (!postfix.empty())
     {
-      std::string token = postfix.drop();
+      std::string token = postfix.pop();
 
       if (isNumber(token))
       {
