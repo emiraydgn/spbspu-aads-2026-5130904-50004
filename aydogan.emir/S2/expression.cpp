@@ -416,19 +416,15 @@ int aydogan::run(std::istream& in, std::ostream& out, std::ostream& err)
     }
   }
 
-  bool first = true;
-  while (!results.empty())
+  if (!results.empty())
   {
-    if (!first)
-    {
-      out << " ";
-    }
     out << results.drop();
-    first = false;
-  }
 
-  if (!first)
-  {
+    while (!results.empty())
+    {
+      out << " " << results.drop();
+    }
+
     out << "\n";
   }
 
