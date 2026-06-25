@@ -13,8 +13,12 @@ namespace
 {
   bool isOperator(const std::string& token)
   {
-    return token == "+" || token == "-" || token == "*" ||
-           token == "/" || token == "%" || token == "**";
+    return token == "+"
+      || token == "-"
+      || token == "*"
+      || token == "/"
+      || token == "%"
+      || token == "**";
   }
 
   int precedence(const std::string& token)
@@ -91,35 +95,75 @@ namespace
 
   long long checkedAdd(long long lhs, long long rhs)
   {
-    __int128 value = static_cast< __int128 >(lhs) + static_cast< __int128 >(rhs);
-    if (value < std::numeric_limits< long long >::min() ||
-        value > std::numeric_limits< long long >::max())
+    if (rhs > 0 && lhs > std::numeric_limits< long long >::max() - rhs)
     {
       throw std::overflow_error("Overflow");
     }
-    return static_cast< long long >(value);
+    if (rhs < 0 && lhs < std::numeric_limits< long long >::min() - rhs)
+    {
+      throw std::overflow_error("Overflow");
+    }
+
+    return lhs + rhs;
   }
 
   long long checkedSub(long long lhs, long long rhs)
   {
-    __int128 value = static_cast< __int128 >(lhs) - static_cast< __int128 >(rhs);
-    if (value < std::numeric_limits< long long >::min() ||
-        value > std::numeric_limits< long long >::max())
+    if (rhs < 0 && lhs > std::numeric_limits< long long >::max() + rhs)
     {
       throw std::overflow_error("Overflow");
     }
-    return static_cast< long long >(value);
+    if (rhs > 0 && lhs < std::numeric_limits< long long >::min() + rhs)
+    {
+      throw std::overflow_error("Overflow");
+    }
+
+    return lhs - rhs;
   }
 
   long long checkedMul(long long lhs, long long rhs)
   {
-    __int128 value = static_cast< __int128 >(lhs) * static_cast< __int128 >(rhs);
-    if (value < std::numeric_limits< long long >::min() ||
-        value > std::numeric_limits< long long >::max())
+    const long long max = std::numeric_limits< long long >::max();
+    const long long min = std::numeric_limits< long long >::min();
+
+    if (lhs == 0 || rhs == 0)
+    {
+      return 0;
+    }
+
+    if (lhs == -1 && rhs == min)
     {
       throw std::overflow_error("Overflow");
     }
-    return static_cast< long long >(value);
+    if (rhs == -1 && lhs == min)
+    {
+      throw std::overflow_error("Overflow");
+    }
+
+    if (lhs > 0)
+    {
+      if (rhs > 0 && lhs > max / rhs)
+      {
+        throw std::overflow_error("Overflow");
+      }
+      if (rhs < 0 && rhs < min / lhs)
+      {
+        throw std::overflow_error("Overflow");
+      }
+    }
+    else
+    {
+      if (rhs > 0 && lhs < min / rhs)
+      {
+        throw std::overflow_error("Overflow");
+      }
+      if (rhs < 0 && lhs < max / rhs)
+      {
+        throw std::overflow_error("Overflow");
+      }
+    }
+
+    return lhs * rhs;
   }
 
   long long checkedDiv(long long lhs, long long rhs)
