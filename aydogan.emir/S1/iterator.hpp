@@ -18,53 +18,74 @@ namespace aydogan
     friend class ConstIterator< T >;
 
   public:
-    Iterator():
-      node_(nullptr)
-    {}
+    Iterator();
 
-    T& operator*() const
-    {
-      return node_->data;
-    }
+    T& operator*() const;
+    T* operator->() const;
 
-    T* operator->() const
-    {
-      return &(node_->data);
-    }
+    Iterator& operator++();
+    Iterator operator++(int);
 
-    Iterator& operator++()
-    {
-      if (node_ != nullptr)
-      {
-        node_ = node_->next;
-      }
-      return *this;
-    }
-
-    Iterator operator++(int)
-    {
-      Iterator tmp(*this);
-      ++(*this);
-      return tmp;
-    }
-
-    bool operator==(const Iterator& other) const
-    {
-      return node_ == other.node_;
-    }
-
-    bool operator!=(const Iterator& other) const
-    {
-      return node_ != other.node_;
-    }
+    bool operator==(const Iterator& other) const;
+    bool operator!=(const Iterator& other) const;
 
   private:
-    explicit Iterator(detail::Node< T >* node):
-      node_(node)
-    {}
+    explicit Iterator(detail::Node< T >* node);
 
     detail::Node< T >* node_;
   };
+
+  template< class T >
+  Iterator< T >::Iterator():
+    node_(nullptr)
+  {}
+
+  template< class T >
+  T& Iterator< T >::operator*() const
+  {
+    return node_->data;
+  }
+
+  template< class T >
+  T* Iterator< T >::operator->() const
+  {
+    return &(node_->data);
+  }
+
+  template< class T >
+  Iterator< T >& Iterator< T >::operator++()
+  {
+    if (node_ != nullptr)
+    {
+      node_ = node_->next;
+    }
+    return *this;
+  }
+
+  template< class T >
+  Iterator< T > Iterator< T >::operator++(int)
+  {
+    Iterator tmp(*this);
+    ++(*this);
+    return tmp;
+  }
+
+  template< class T >
+  bool Iterator< T >::operator==(const Iterator& other) const
+  {
+    return node_ == other.node_;
+  }
+
+  template< class T >
+  bool Iterator< T >::operator!=(const Iterator& other) const
+  {
+    return node_ != other.node_;
+  }
+
+  template< class T >
+  Iterator< T >::Iterator(detail::Node< T >* node):
+    node_(node)
+  {}
 }
 
 #endif
