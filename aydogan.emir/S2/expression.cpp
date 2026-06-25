@@ -1,12 +1,13 @@
 #include "expression.hpp"
-#include "queue.hpp"
-#include "stack.hpp"
+
 #include <cctype>
-#include <iostream>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+
+#include "queue.hpp"
+#include "stack.hpp"
 
 namespace
 {
