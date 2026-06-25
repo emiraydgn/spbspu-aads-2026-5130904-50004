@@ -1,5 +1,5 @@
-#ifndef LOGIC_HPP
-#define LOGIC_HPP
+#ifndef EXPRESSION_HPP
+#define EXPRESSION_HPP
 
 #include <iosfwd>
 #include <string>

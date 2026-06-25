@@ -3,7 +3,7 @@
 
 #include "stack.hpp"
 #include "queue.hpp"
-#include "logic.hpp"
+#include "expression.hpp"
 
 BOOST_AUTO_TEST_CASE(stack_test)
 {
