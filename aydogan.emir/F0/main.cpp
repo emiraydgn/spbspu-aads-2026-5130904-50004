@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <limits>
-#include <unordered_map>
+#include <stdexcept>
 
 #include "dictionary.hpp"
 
@@ -9,36 +9,45 @@ int main()
 {
   DictionaryStorage storage;
 
-  using cmd_t = void (*)(std::istream &, std::ostream &, DictionaryStorage &);
-  std::unordered_map< std::string, cmd_t > cmds;
-
-  cmds["create-dict"] = createDict;
-  cmds["show"] = showDict;
-  cmds["drop-dict"] = dropDict;
-  cmds["add-word"] = addWord;
-  cmds["remove-word"] = removeWord;
-  cmds["add-translation"] = addTranslation;
-  cmds["remove-translation"] = removeTranslation;
-  cmds["translate"] = translate;
-  cmds["merge-dict"] = mergeDict;
-  cmds["union"] = unionDict;
-  cmds["difference"] = differenceDict;
-  cmds["count"] = countDict;
-  cmds["save"] = saveDict;
-  cmds["load"] = loadDict;
-  cmds["help"] = help;
-
   std::string cmd;
   while (std::cin >> cmd) {
-    if (cmd == "exit") {
-      break;
-    }
-
     try {
-      cmds.at(cmd)(std::cin, std::cout, storage);
-    } catch (const std::out_of_range &) {
-      std::cout << "<INVALID COMMAND>\n";
-      std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+      if (cmd == "exit") {
+        break;
+      } else if (cmd == "create-dict") {
+        createDict(std::cin, std::cout, storage);
+      } else if (cmd == "show") {
+        showDict(std::cin, std::cout, storage);
+      } else if (cmd == "drop-dict") {
+        dropDict(std::cin, std::cout, storage);
+      } else if (cmd == "add-word") {
+        addWord(std::cin, std::cout, storage);
+      } else if (cmd == "remove-word") {
+        removeWord(std::cin, std::cout, storage);
+      } else if (cmd == "add-translation") {
+        addTranslation(std::cin, std::cout, storage);
+      } else if (cmd == "remove-translation") {
+        removeTranslation(std::cin, std::cout, storage);
+      } else if (cmd == "translate") {
+        translate(std::cin, std::cout, storage);
+      } else if (cmd == "merge-dict") {
+        mergeDict(std::cin, std::cout, storage);
+      } else if (cmd == "union") {
+        unionDict(std::cin, std::cout, storage);
+      } else if (cmd == "difference") {
+        differenceDict(std::cin, std::cout, storage);
+      } else if (cmd == "count") {
+        countDict(std::cin, std::cout, storage);
+      } else if (cmd == "save") {
+        saveDict(std::cin, std::cout, storage);
+      } else if (cmd == "load") {
+        loadDict(std::cin, std::cout, storage);
+      } else if (cmd == "help") {
+        help(std::cin, std::cout, storage);
+      } else {
+        std::cout << "<INVALID COMMAND>\n";
+        std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+      }
     } catch (const std::logic_error & e) {
       std::cout << "<INVALID COMMAND: " << e.what() << ">\n";
     }
