@@ -1,7 +1,7 @@
 #include "dictionary.hpp"
+#include <cctype>
 #include <fstream>
 #include <iomanip>
-#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -9,16 +9,67 @@ namespace aydogan
 {
   namespace detail
   {
+    void skipSpaces(const std::string & line, std::size_t & pos)
+    {
+      while (pos < line.size() && std::isspace(static_cast< unsigned char >(line[pos]))) {
+        ++pos;
+      }
+    }
+
+    std::string readToken(const std::string & line, std::size_t & pos)
+    {
+      skipSpaces(line, pos);
+
+      std::size_t begin = pos;
+      while (pos < line.size() && !std::isspace(static_cast< unsigned char >(line[pos]))) {
+        ++pos;
+      }
+
+      return line.substr(begin, pos - begin);
+    }
+
+    bool readQuoted(const std::string & line, std::size_t & pos, std::string & value)
+    {
+      skipSpaces(line, pos);
+
+      if (pos >= line.size()) {
+        return false;
+      }
+      if (line[pos] != '"') {
+        throw std::logic_error("bad file format");
+      }
+
+      ++pos;
+      std::size_t begin = pos;
+
+      while (pos < line.size() && line[pos] != '"') {
+        ++pos;
+      }
+
+      if (pos >= line.size()) {
+        throw std::logic_error("bad file format");
+      }
+
+      value = line.substr(begin, pos - begin);
+      ++pos;
+      return true;
+    }
+
     std::vector< std::string > readDictNames(std::istream & in)
     {
       std::string line;
       std::getline(in, line);
-      std::istringstream iss(line);
+
       std::vector< std::string > dicts;
-      std::string name;
-      while (iss >> name) {
-        dicts.push_back(name);
+      std::size_t pos = 0;
+
+      while (pos < line.size()) {
+        std::string name = readToken(line, pos);
+        if (!name.empty()) {
+          dicts.push_back(name);
+        }
       }
+
       return dicts;
     }
 
@@ -321,19 +372,25 @@ void aydogan::loadDict(std::istream & in, std::ostream &, DictionaryStorage & st
       continue;
     }
 
-    std::istringstream iss(line);
-    std::string word;
-    iss >> word;
+    std::size_t pos = 0;
+    std::string word = detail::readToken(line, pos);
+    if (word.empty()) {
+      continue;
+    }
 
     std::string translation;
     bool first = true;
-    while (iss >> std::quoted(translation)) {
+    while (detail::readQuoted(line, pos, translation)) {
       if (first) {
         newDict.insert(word, translation);
         first = false;
       } else {
         newDict.addTranslation(word, translation);
       }
+    }
+
+    if (first) {
+      throw std::logic_error("bad file format");
     }
   }
   storage.emplace(dict, newDict);
