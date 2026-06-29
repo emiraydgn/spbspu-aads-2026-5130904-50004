@@ -84,12 +84,12 @@ void aydogan::HashTable::insert(const std::string & key, const std::string & val
         insertIdx = idx;
       }
 
-      table_[insertIdx].key = key;
-      table_[insertIdx].translations.clear();
-      table_[insertIdx].translations.insertAfter(
-        table_[insertIdx].translations.beforeBegin(),
-        value
-      );
+      std::string newKey(key);
+      List< std::string > newTranslations;
+      newTranslations.insertAfter(newTranslations.beforeBegin(), value);
+
+      table_[insertIdx].key.swap(newKey);
+      table_[insertIdx].translations.swap(newTranslations);
       table_[insertIdx].occupied = true;
       table_[insertIdx].deleted = false;
       ++count_;
@@ -98,12 +98,12 @@ void aydogan::HashTable::insert(const std::string & key, const std::string & val
   }
 
   if (foundDeleted) {
-    table_[insertIdx].key = key;
-    table_[insertIdx].translations.clear();
-    table_[insertIdx].translations.insertAfter(
-      table_[insertIdx].translations.beforeBegin(),
-      value
-    );
+    std::string newKey(key);
+    List< std::string > newTranslations;
+    newTranslations.insertAfter(newTranslations.beforeBegin(), value);
+
+    table_[insertIdx].key.swap(newKey);
+    table_[insertIdx].translations.swap(newTranslations);
     table_[insertIdx].occupied = true;
     table_[insertIdx].deleted = false;
     ++count_;
