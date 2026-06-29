@@ -2,10 +2,61 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
-void createDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
+namespace aydogan
+{
+  namespace detail
+  {
+    std::vector< std::string > readDictNames(std::istream & in)
+    {
+      std::string line;
+      std::getline(in, line);
+      std::istringstream iss(line);
+      std::vector< std::string > dicts;
+      std::string name;
+      while (iss >> name) {
+        dicts.push_back(name);
+      }
+      return dicts;
+    }
+
+    void checkDictsExist(const std::vector< std::string > & dicts, const DictionaryStorage & storage)
+    {
+      for (const std::string & d : dicts) {
+        if (!storage.count(d)) {
+          throw std::logic_error("dictionary not found: " + d);
+        }
+      }
+    }
+
+    void addWordToDict(Dictionary & dict, const std::string & key, const List< std::string > & translations)
+    {
+      bool first = true;
+      for (ConstIterator< std::string > it = translations.cbegin(); it != translations.cend(); ++it) {
+        if (first) {
+          dict.insert(key, *it);
+          first = false;
+        } else {
+          dict.addTranslation(key, *it);
+        }
+      }
+    }
+
+    bool containsTranslation(const List< std::string > & translations, const std::string & value)
+    {
+      for (ConstIterator< std::string > it = translations.cbegin(); it != translations.cend(); ++it) {
+        if (*it == value) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+}
+
+void aydogan::createDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
   std::string name;
   in >> name;
@@ -15,7 +66,7 @@ void createDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
   storage.emplace(name, Dictionary());
 }
 
-void showDict(std::istream & in, std::ostream & out, DictionaryStorage & storage)
+void aydogan::showDict(std::istream & in, std::ostream & out, DictionaryStorage & storage)
 {
   std::string name;
   in >> name;
@@ -25,7 +76,7 @@ void showDict(std::istream & in, std::ostream & out, DictionaryStorage & storage
   out << "<DICT: " << name << ", WORDS: " << storage.at(name).count() << ">\n";
 }
 
-void dropDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
+void aydogan::dropDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
   std::string name;
   in >> name;
@@ -35,9 +86,11 @@ void dropDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
   storage.erase(name);
 }
 
-void addWord(std::istream & in, std::ostream &, DictionaryStorage & storage)
+void aydogan::addWord(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
-  std::string dict, word, translation;
+  std::string dict;
+  std::string word;
+  std::string translation;
   in >> dict >> word >> std::quoted(translation);
   if (!storage.count(dict)) {
     throw std::logic_error("dictionary not found");
@@ -45,9 +98,10 @@ void addWord(std::istream & in, std::ostream &, DictionaryStorage & storage)
   storage.at(dict).insert(word, translation);
 }
 
-void removeWord(std::istream & in, std::ostream &, DictionaryStorage & storage)
+void aydogan::removeWord(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
-  std::string dict, word;
+  std::string dict;
+  std::string word;
   in >> dict >> word;
   if (!storage.count(dict)) {
     throw std::logic_error("dictionary not found");
@@ -55,9 +109,11 @@ void removeWord(std::istream & in, std::ostream &, DictionaryStorage & storage)
   storage.at(dict).remove(word);
 }
 
-void addTranslation(std::istream & in, std::ostream &, DictionaryStorage & storage)
+void aydogan::addTranslation(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
-  std::string dict, word, translation;
+  std::string dict;
+  std::string word;
+  std::string translation;
   in >> dict >> word >> std::quoted(translation);
   if (!storage.count(dict)) {
     throw std::logic_error("dictionary not found");
@@ -65,9 +121,11 @@ void addTranslation(std::istream & in, std::ostream &, DictionaryStorage & stora
   storage.at(dict).addTranslation(word, translation);
 }
 
-void removeTranslation(std::istream & in, std::ostream &, DictionaryStorage & storage)
+void aydogan::removeTranslation(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
-  std::string dict, word, translation;
+  std::string dict;
+  std::string word;
+  std::string translation;
   in >> dict >> word >> std::quoted(translation);
   if (!storage.count(dict)) {
     throw std::logic_error("dictionary not found");
@@ -75,97 +133,54 @@ void removeTranslation(std::istream & in, std::ostream &, DictionaryStorage & st
   storage.at(dict).removeTranslation(word, translation);
 }
 
-void translate(std::istream & in, std::ostream & out, DictionaryStorage & storage)
+void aydogan::translate(std::istream & in, std::ostream & out, DictionaryStorage & storage)
 {
-  std::string dict, word;
+  std::string dict;
+  std::string word;
   in >> dict >> word;
   if (!storage.count(dict)) {
     throw std::logic_error("dictionary not found");
   }
-  std::list< std::string > translations = storage.at(dict).get(word);
+
+  List< std::string > translations = storage.at(dict).get(word);
   out << "<";
   bool first = true;
-  for (const auto & t : translations) {
+  for (ConstIterator< std::string > it = translations.cbegin(); it != translations.cend(); ++it) {
     if (!first) {
       out << ", ";
     }
-    out << t;
+    out << *it;
     first = false;
   }
   out << ">\n";
 }
 
-namespace {
-
-  std::vector< std::string > readDictNames(std::istream & in)
-  {
-    std::string line;
-    std::getline(in, line);
-    std::istringstream iss(line);
-    std::vector< std::string > dicts;
-    std::string name;
-    while (iss >> name) {
-      dicts.push_back(name);
-    }
-    return dicts;
-  }
-
-  void checkDictsExist(const std::vector< std::string > & dicts, const DictionaryStorage & storage)
-  {
-    for (const auto & d : dicts) {
-      if (!storage.count(d)) {
-        throw std::logic_error("dictionary not found: " + d);
-      }
-    }
-  }
-
-  void addWordToDict(Dictionary & dict, const std::string & key, const std::list< std::string > & translations)
-  {
-    bool first = true;
-    for (const auto & t : translations) {
-      if (first) {
-        dict.insert(key, t);
-        first = false;
-      } else {
-        dict.addTranslation(key, t);
-      }
-    }
-  }
-
-}
-
-void mergeDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
+void aydogan::mergeDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
   std::string result;
   in >> result;
   if (storage.count(result)) {
     throw std::logic_error("dictionary already exists");
   }
-  std::vector< std::string > dicts = readDictNames(in);
+
+  std::vector< std::string > dicts = detail::readDictNames(in);
   if (dicts.empty()) {
     throw std::logic_error("no dictionaries specified");
   }
-  checkDictsExist(dicts, storage);
+  detail::checkDictsExist(dicts, storage);
 
   Dictionary merged;
-  for (const auto & d : dicts) {
-    for (const auto & key : storage.at(d).keys()) {
-      std::list< std::string > translations = storage.at(d).get(key);
+  for (const std::string & d : dicts) {
+    for (const std::string & key : storage.at(d).keys()) {
+      List< std::string > translations = storage.at(d).get(key);
       if (!merged.contains(key)) {
-        addWordToDict(merged, key, translations);
+        detail::addWordToDict(merged, key, translations);
       } else {
-        std::list< std::string > existing = merged.get(key);
-        for (const auto & t : translations) {
-          bool found = false;
-          for (const auto & et : existing) {
-            if (et == t) {
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            merged.addTranslation(key, t);
-            existing.push_back(t);
+        List< std::string > existing = merged.get(key);
+        for (ConstIterator< std::string > it = translations.cbegin(); it != translations.cend(); ++it) {
+          if (!detail::containsTranslation(existing, *it)) {
+            merged.addTranslation(key, *it);
+            existing = merged.get(key);
           }
         }
       }
@@ -174,46 +189,48 @@ void mergeDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
   storage.emplace(result, merged);
 }
 
-void unionDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
+void aydogan::unionDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
   std::string result;
   in >> result;
   if (storage.count(result)) {
     throw std::logic_error("dictionary already exists");
   }
-  std::vector< std::string > dicts = readDictNames(in);
+
+  std::vector< std::string > dicts = detail::readDictNames(in);
   if (dicts.empty()) {
     throw std::logic_error("no dictionaries specified");
   }
-  checkDictsExist(dicts, storage);
+  detail::checkDictsExist(dicts, storage);
 
   Dictionary united;
-  for (const auto & d : dicts) {
-    for (const auto & key : storage.at(d).keys()) {
+  for (const std::string & d : dicts) {
+    for (const std::string & key : storage.at(d).keys()) {
       if (!united.contains(key)) {
-        addWordToDict(united, key, storage.at(d).get(key));
+        detail::addWordToDict(united, key, storage.at(d).get(key));
       }
     }
   }
   storage.emplace(result, united);
 }
 
-void differenceDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
+void aydogan::differenceDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
   std::string result;
   in >> result;
   if (storage.count(result)) {
     throw std::logic_error("dictionary already exists");
   }
-  std::vector< std::string > dicts = readDictNames(in);
+
+  std::vector< std::string > dicts = detail::readDictNames(in);
   if (dicts.size() < 2) {
     throw std::logic_error("at least two dictionaries required");
   }
-  checkDictsExist(dicts, storage);
+  detail::checkDictsExist(dicts, storage);
 
   Dictionary diff;
   const std::string & first = dicts[0];
-  for (const auto & key : storage.at(first).keys()) {
+  for (const std::string & key : storage.at(first).keys()) {
     bool inOther = false;
     for (std::size_t i = 1; i < dicts.size(); ++i) {
       if (storage.at(dicts[i]).contains(key)) {
@@ -222,13 +239,13 @@ void differenceDict(std::istream & in, std::ostream &, DictionaryStorage & stora
       }
     }
     if (!inOther) {
-      addWordToDict(diff, key, storage.at(first).get(key));
+      detail::addWordToDict(diff, key, storage.at(first).get(key));
     }
   }
   storage.emplace(result, diff);
 }
 
-void countDict(std::istream & in, std::ostream & out, DictionaryStorage & storage)
+void aydogan::countDict(std::istream & in, std::ostream & out, DictionaryStorage & storage)
 {
   std::string name;
   in >> name;
@@ -238,7 +255,7 @@ void countDict(std::istream & in, std::ostream & out, DictionaryStorage & storag
   out << storage.at(name).count() << "\n";
 }
 
-void help(std::istream &, std::ostream & out, DictionaryStorage &)
+void aydogan::help(std::istream &, std::ostream & out, DictionaryStorage &)
 {
   out << "Commands:\n";
   out << "  create-dict <dict>\n";
@@ -259,46 +276,55 @@ void help(std::istream &, std::ostream & out, DictionaryStorage &)
   out << "  exit\n";
 }
 
-void saveDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
+void aydogan::saveDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
-  std::string dict, filename;
+  std::string dict;
+  std::string filename;
   in >> dict >> filename;
   if (!storage.count(dict)) {
     throw std::logic_error("dictionary not found");
   }
+
   std::ofstream file(filename);
   if (!file) {
     throw std::logic_error("cannot open file");
   }
-  for (const auto & key : storage.at(dict).keys()) {
+
+  for (const std::string & key : storage.at(dict).keys()) {
     file << key;
-    for (const auto & t : storage.at(dict).get(key)) {
-      file << ' ' << std::quoted(t);
+    List< std::string > translations = storage.at(dict).get(key);
+    for (ConstIterator< std::string > it = translations.cbegin(); it != translations.cend(); ++it) {
+      file << ' ' << std::quoted(*it);
     }
     file << '\n';
   }
 }
 
-void loadDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
+void aydogan::loadDict(std::istream & in, std::ostream &, DictionaryStorage & storage)
 {
-  std::string dict, filename;
+  std::string dict;
+  std::string filename;
   in >> dict >> filename;
   if (storage.count(dict)) {
     throw std::logic_error("dictionary already exists");
   }
+
   std::ifstream file(filename);
   if (!file) {
     throw std::logic_error("cannot open file");
   }
+
   Dictionary newDict;
   std::string line;
   while (std::getline(file, line)) {
     if (line.empty()) {
       continue;
     }
+
     std::istringstream iss(line);
     std::string word;
     iss >> word;
+
     std::string translation;
     bool first = true;
     while (iss >> std::quoted(translation)) {

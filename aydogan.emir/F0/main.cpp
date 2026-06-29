@@ -1,13 +1,13 @@
 #include <iostream>
-#include <string>
 #include <limits>
 #include <stdexcept>
+#include <string>
 
 #include "dictionary.hpp"
 
 int main()
 {
-  DictionaryStorage storage;
+  aydogan::DictionaryStorage storage;
 
   std::string cmd;
   while (std::cin >> cmd) {
@@ -15,35 +15,35 @@ int main()
       if (cmd == "exit") {
         break;
       } else if (cmd == "create-dict") {
-        createDict(std::cin, std::cout, storage);
+        aydogan::createDict(std::cin, std::cout, storage);
       } else if (cmd == "show") {
-        showDict(std::cin, std::cout, storage);
+        aydogan::showDict(std::cin, std::cout, storage);
       } else if (cmd == "drop-dict") {
-        dropDict(std::cin, std::cout, storage);
+        aydogan::dropDict(std::cin, std::cout, storage);
       } else if (cmd == "add-word") {
-        addWord(std::cin, std::cout, storage);
+        aydogan::addWord(std::cin, std::cout, storage);
       } else if (cmd == "remove-word") {
-        removeWord(std::cin, std::cout, storage);
+        aydogan::removeWord(std::cin, std::cout, storage);
       } else if (cmd == "add-translation") {
-        addTranslation(std::cin, std::cout, storage);
+        aydogan::addTranslation(std::cin, std::cout, storage);
       } else if (cmd == "remove-translation") {
-        removeTranslation(std::cin, std::cout, storage);
+        aydogan::removeTranslation(std::cin, std::cout, storage);
       } else if (cmd == "translate") {
-        translate(std::cin, std::cout, storage);
+        aydogan::translate(std::cin, std::cout, storage);
       } else if (cmd == "merge-dict") {
-        mergeDict(std::cin, std::cout, storage);
+        aydogan::mergeDict(std::cin, std::cout, storage);
       } else if (cmd == "union") {
-        unionDict(std::cin, std::cout, storage);
+        aydogan::unionDict(std::cin, std::cout, storage);
       } else if (cmd == "difference") {
-        differenceDict(std::cin, std::cout, storage);
+        aydogan::differenceDict(std::cin, std::cout, storage);
       } else if (cmd == "count") {
-        countDict(std::cin, std::cout, storage);
+        aydogan::countDict(std::cin, std::cout, storage);
       } else if (cmd == "save") {
-        saveDict(std::cin, std::cout, storage);
+        aydogan::saveDict(std::cin, std::cout, storage);
       } else if (cmd == "load") {
-        loadDict(std::cin, std::cout, storage);
+        aydogan::loadDict(std::cin, std::cout, storage);
       } else if (cmd == "help") {
-        help(std::cin, std::cout, storage);
+        aydogan::help(std::cin, std::cout, storage);
       } else {
         std::cout << "<INVALID COMMAND>\n";
         std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
