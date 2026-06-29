@@ -11,7 +11,7 @@ namespace aydogan
   class HashTable
   {
   public:
-    explicit HashTable(std::size_t size = 101);
+    explicit HashTable(std::size_t size = 128);
 
     void insert(const std::string & key, const std::string & value);
     void remove(const std::string & key);
@@ -27,7 +27,8 @@ namespace aydogan
     void clear();
 
   private:
-    struct Entry {
+    struct Entry
+    {
       std::string key;
       List< std::string > translations;
       bool occupied;
@@ -49,8 +50,7 @@ namespace aydogan
 
     void rehash();
 
-    static bool isPrime(std::size_t n);
-    static std::size_t nextPrime(std::size_t n);
+    static std::size_t normalizeCapacity(std::size_t capacity);
   };
 }
 

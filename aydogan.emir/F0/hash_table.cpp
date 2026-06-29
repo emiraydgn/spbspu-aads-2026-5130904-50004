@@ -1,35 +1,24 @@
 #include "hash_table.hpp"
 #include <stdexcept>
 
-bool aydogan::HashTable::isPrime(std::size_t n)
+std::size_t aydogan::HashTable::normalizeCapacity(std::size_t capacity)
 {
-  if (n < 2) {
-    return false;
-  }
-  if (n == 2) {
-    return true;
-  }
-  if (n % 2 == 0) {
-    return false;
-  }
-  for (std::size_t i = 3; i * i <= n; i += 2) {
-    if (n % i == 0) {
-      return false;
-    }
-  }
-  return true;
-}
+  const std::size_t minCapacity = 8;
 
-std::size_t aydogan::HashTable::nextPrime(std::size_t n)
-{
-  while (!isPrime(n)) {
-    ++n;
+  if (capacity < minCapacity) {
+    capacity = minCapacity;
   }
-  return n;
+
+  std::size_t result = 1;
+  while (result < capacity) {
+    result *= 2;
+  }
+
+  return result;
 }
 
 aydogan::HashTable::HashTable(std::size_t size):
-  size_(nextPrime(size)),
+  size_(normalizeCapacity(size)),
   count_(0)
 {
   table_.assign(size_, Entry());
@@ -37,20 +26,26 @@ aydogan::HashTable::HashTable(std::size_t size):
 
 std::size_t aydogan::HashTable::hash1(const std::string & key) const
 {
+  const std::size_t base = 31;
   std::size_t hash = 0;
+
   for (char c : key) {
-    hash = hash * 31 + static_cast< std::size_t >(c);
+    hash = hash * base + static_cast< std::size_t >(c);
   }
+
   return hash % size_;
 }
 
 std::size_t aydogan::HashTable::hash2(const std::string & key) const
 {
+  const std::size_t base = 37;
   std::size_t hash = 0;
+
   for (char c : key) {
-    hash = hash * 37 + static_cast< std::size_t >(c);
+    hash = hash * base + static_cast< std::size_t >(c);
   }
-  return 1 + (hash % (size_ - 1));
+
+  return 2 * (hash % (size_ / 2)) + 1;
 }
 
 std::size_t aydogan::HashTable::probe(const std::string & key, std::size_t i) const
@@ -234,7 +229,7 @@ void aydogan::HashTable::clear()
 
 void aydogan::HashTable::rehash()
 {
-  std::size_t newSize = nextPrime(size_ * 2);
+  std::size_t newSize = size_ * 2;
   std::vector< Entry > oldTable = table_;
   table_.assign(newSize, Entry());
   size_ = newSize;
