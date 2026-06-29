@@ -22,7 +22,7 @@ namespace aydogan
     bool contains(const std::string & key) const;
     std::size_t count() const;
 
-    std::vector< std::string > keys() const;
+    List< std::string > keys() const;
 
     void clear();
 

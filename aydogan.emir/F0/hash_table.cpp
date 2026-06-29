@@ -132,12 +132,14 @@ void aydogan::HashTable::addTranslation(const std::string & key, const std::stri
       break;
     }
     if (table_[idx].occupied && !table_[idx].deleted && table_[idx].key == key) {
-      aydogan::Iterator< std::string > tail = table_[idx].translations.beforeBegin();
-      for (aydogan::Iterator< std::string > it = table_[idx].translations.begin();
+      Iterator< std::string > tail = table_[idx].translations.beforeBegin();
+
+      for (Iterator< std::string > it = table_[idx].translations.begin();
           it != table_[idx].translations.end();
           ++it) {
         ++tail;
       }
+
       table_[idx].translations.insertAfter(tail, value);
       return;
     }
@@ -153,9 +155,9 @@ void aydogan::HashTable::removeTranslation(const std::string & key, const std::s
       break;
     }
     if (table_[idx].occupied && !table_[idx].deleted && table_[idx].key == key) {
-      aydogan::List< std::string > & translations = table_[idx].translations;
-      aydogan::Iterator< std::string > previous = translations.beforeBegin();
-      aydogan::Iterator< std::string > current = translations.begin();
+      List< std::string > & translations = table_[idx].translations;
+      Iterator< std::string > previous = translations.beforeBegin();
+      Iterator< std::string > current = translations.begin();
 
       while (current != translations.end() && *current != value) {
         ++previous;
@@ -210,14 +212,17 @@ std::size_t aydogan::HashTable::count() const
   return count_;
 }
 
-std::vector< std::string > aydogan::HashTable::keys() const
+aydogan::List< std::string > aydogan::HashTable::keys() const
 {
-  std::vector< std::string > result;
+  List< std::string > result;
+  Iterator< std::string > tail = result.beforeBegin();
+
   for (const Entry & entry : table_) {
     if (entry.occupied && !entry.deleted) {
-      result.push_back(entry.key);
+      tail = result.insertAfter(tail, entry.key);
     }
   }
+
   return result;
 }
 
@@ -238,7 +243,8 @@ void aydogan::HashTable::rehash()
   for (const Entry & entry : oldTable) {
     if (entry.occupied && !entry.deleted) {
       bool first = true;
-      for (aydogan::ConstIterator< std::string > it = entry.translations.cbegin();
+
+      for (ConstIterator< std::string > it = entry.translations.cbegin();
           it != entry.translations.cend();
           ++it) {
         if (first) {
