@@ -21,19 +21,19 @@ namespace aydogan
     struct Node
     {
       T data;
-      Node* next;
+      Node * next;
 
       Node():
         data(),
         next(nullptr)
       {}
 
-      Node(const T& value, Node* nextNode):
+      Node(const T & value, Node * nextNode):
         data(value),
         next(nextNode)
       {}
 
-      Node(T&& value, Node* nextNode):
+      Node(T && value, Node * nextNode):
         data(std::move(value)),
         next(nextNode)
       {}
@@ -51,20 +51,19 @@ namespace aydogan
       node_(nullptr)
     {}
 
-    T& operator*() const
+    T & operator*() const
     {
       return node_->data;
     }
 
-    T* operator->() const
+    T * operator->() const
     {
       return &(node_->data);
     }
 
-    Iterator& operator++()
+    Iterator & operator++()
     {
-      if (node_ != nullptr)
-      {
+      if (node_ != nullptr) {
         node_ = node_->next;
       }
       return *this;
@@ -77,22 +76,22 @@ namespace aydogan
       return tmp;
     }
 
-    bool operator==(const Iterator& other) const
+    bool operator==(const Iterator & other) const
     {
       return node_ == other.node_;
     }
 
-    bool operator!=(const Iterator& other) const
+    bool operator!=(const Iterator & other) const
     {
       return node_ != other.node_;
     }
 
   private:
-    explicit Iterator(detail::Node< T >* node):
+    explicit Iterator(detail::Node< T > * node):
       node_(node)
     {}
 
-    detail::Node< T >* node_;
+    detail::Node< T > * node_;
   };
 
   template< class T >
@@ -105,24 +104,23 @@ namespace aydogan
       node_(nullptr)
     {}
 
-    ConstIterator(const Iterator< T >& other):
+    ConstIterator(const Iterator< T > & other):
       node_(other.node_)
     {}
 
-    const T& operator*() const
+    const T & operator*() const
     {
       return node_->data;
     }
 
-    const T* operator->() const
+    const T * operator->() const
     {
       return &(node_->data);
     }
 
-    ConstIterator& operator++()
+    ConstIterator & operator++()
     {
-      if (node_ != nullptr)
-      {
+      if (node_ != nullptr) {
         node_ = node_->next;
       }
       return *this;
@@ -135,22 +133,22 @@ namespace aydogan
       return tmp;
     }
 
-    bool operator==(const ConstIterator& other) const
+    bool operator==(const ConstIterator & other) const
     {
       return node_ == other.node_;
     }
 
-    bool operator!=(const ConstIterator& other) const
+    bool operator!=(const ConstIterator & other) const
     {
       return node_ != other.node_;
     }
 
   private:
-    explicit ConstIterator(const detail::Node< T >* node):
+    explicit ConstIterator(const detail::Node< T > * node):
       node_(node)
     {}
 
-    const detail::Node< T >* node_;
+    const detail::Node< T > * node_;
   };
 
   template< class T >
@@ -164,20 +162,19 @@ namespace aydogan
       fake_(new detail::Node< T >())
     {}
 
-    List(const List& other):
+    List(const List & other):
       List()
     {
       Iterator< T > tail = beforeBegin();
-      for (ConstIterator< T > it = other.cbegin(); it != other.cend(); ++it)
-      {
+      for (ConstIterator< T > it = other.cbegin(); it != other.cend(); ++it) {
         tail = insertAfter(tail, *it);
       }
     }
 
-    List(List&& other):
-      fake_(other.fake_)
+    List(List && other):
+      List()
     {
-      other.fake_ = new detail::Node< T >();
+      swap(other);
     }
 
     ~List()
@@ -186,29 +183,25 @@ namespace aydogan
       delete fake_;
     }
 
-    List& operator=(const List& other)
+    List & operator=(const List & other)
     {
-      if (this != &other)
-      {
+      if (this != &other) {
         List tmp(other);
         swap(tmp);
       }
       return *this;
     }
 
-    List& operator=(List&& other)
+    List & operator=(List && other)
     {
-      if (this != &other)
-      {
-        clear();
-        delete fake_;
-        fake_ = other.fake_;
-        other.fake_ = new detail::Node< T >();
+      if (this != &other) {
+        List tmp(std::move(other));
+        swap(tmp);
       }
       return *this;
     }
 
-    void swap(List& other) noexcept
+    void swap(List & other) noexcept
     {
       std::swap(fake_, other.fake_);
     }
@@ -246,7 +239,7 @@ namespace aydogan
     Iterator< T > end() noexcept
     {
       return Iterator< T >(nullptr);
-}
+    }
 
     ConstIterator< T > end() const noexcept
     {
@@ -258,79 +251,69 @@ namespace aydogan
       return ConstIterator< T >(nullptr);
     }
 
-    T& front()
+    T & front()
     {
-      if (empty())
-      {
+      if (empty()) {
         throw std::out_of_range("List is empty");
       }
       return fake_->next->data;
     }
 
-    const T& front() const
+    const T & front() const
     {
-      if (empty())
-      {
+      if (empty()) {
         throw std::out_of_range("List is empty");
       }
       return fake_->next->data;
     }
 
-    void push_front(const T& value)
+    void push_front(const T & value)
     {
       insertAfter(beforeBegin(), value);
     }
 
-    void push_front(T&& value)
+    void push_front(T && value)
     {
       insertAfter(beforeBegin(), std::move(value));
     }
 
     void pop_front()
     {
-      if (empty())
-      {
+      if (empty()) {
         throw std::out_of_range("List is empty");
       }
       eraseAfter(beforeBegin());
     }
 
-    Iterator< T > insertAfter(Iterator< T > pos, const T& value)
+    Iterator< T > insertAfter(Iterator< T > pos, const T & value)
     {
-      if (pos.node_ == nullptr)
-      {
+      if (pos.node_ == nullptr) {
         throw std::out_of_range("Invalid iterator");
       }
 
-      detail::Node< T >* newNode =
-        new detail::Node< T >(value, pos.node_->next);
-
+      detail::Node< T > * newNode = new detail::Node< T >(value, pos.node_->next);
       pos.node_->next = newNode;
       return Iterator< T >(newNode);
     }
 
-    Iterator< T > insertAfter(Iterator< T > pos, T&& value)
+    Iterator< T > insertAfter(Iterator< T > pos, T && value)
     {
-      if (pos.node_ == nullptr)
-      {
+      if (pos.node_ == nullptr) {
         throw std::out_of_range("Invalid iterator");
       }
 
-      detail::Node< T >* newNode =
-        new detail::Node< T >(std::move(value), pos.node_->next);
-
+      detail::Node< T > * newNode = new detail::Node< T >(std::move(value), pos.node_->next);
       pos.node_->next = newNode;
       return Iterator< T >(newNode);
     }
 
     Iterator< T > eraseAfter(Iterator< T > pos)
     {
-      if (pos.node_ == nullptr || pos.node_->next == nullptr)
-      {
+      if (pos.node_ == nullptr || pos.node_->next == nullptr) {
         throw std::out_of_range("Nothing to erase");
       }
 
-      detail::Node< T >* toDelete = pos.node_->next;
+      detail::Node< T > * toDelete = pos.node_->next;
       pos.node_->next = toDelete->next;
       delete toDelete;
 
@@ -339,16 +322,15 @@ namespace aydogan
 
     void clear() noexcept
     {
-      while (!empty())
-      {
-        detail::Node< T >* tmp = fake_->next;
+      while (!empty()) {
+        detail::Node< T > * tmp = fake_->next;
         fake_->next = tmp->next;
         delete tmp;
       }
     }
 
   private:
-    detail::Node< T >* fake_;
+    detail::Node< T > * fake_;
   };
 }
 
